@@ -1,0 +1,1667 @@
+ubuntu下安装nodejs
+1. 下载node-v7.6.0-linux-x64.tar.xz后提取
+2. 移动到opt下:sudo mv node-v7.6.0-linux-x64 /opt/
+3. 安装 npm 和 node 命令到系统命令 
+sudo ln -s /opt/node-v4.4.4-linux-x64/bin/node /usr/local/bin/node 
+sudo ln -s /opt/node-v4.4.4-linux-x64/bin/npm /usr/local/bin/npm
+
+验证: node -v
+输出：v7.6.0
+
+验证: npm -v
+输出：4.1.2
+
+进入node交互模式: node
+> 100+200
+300
+
+退出node, 按ctrl+c两次
+
+node应用
+~/work/nodejs下新建hello.js:
+'use strict'
+console.log('hello world'); --打印输出，如果是在node交互模式中，运行一句则打印结果，如上面的100+200
+
+该目录下运行：node hello.js
+输出：hello world
+
+开启严格模式：
+node --use_strict hello.js (与hello.js的收行作用一样 'use strict')
+
+安装visual studio code
+下载deb文件后提取，进入code目录下直接运行code
+
+打开文件夹/work/nodejs，则该文件夹作为vsc的工程目录
+点击hello.js 点击左边菜单中的调试，运行，提示配置launch.json，配置成如下：
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run hello.js",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/hello.js",
+            "stopOnEntry": false,
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": null,
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "externalConsole": false,
+            "sourceMaps": false,
+            "outDir": null
+        }
+    ]
+}
+
+可看到nodejs工程目录下出现.vscode - launch.json
+有了配置文件，即可使用VS Code调试JavaScript
+
+模块和调用
+hello.js就是一个模块，模块名为hello,　改写hello.js(/vsc_project/hello.js):
+'use strict'
+var s = 'hello';
+
+function greet(name){
+    console.log(s + ',' + name + '!');
+}
+
+module.exports = greet;//暴露函数，也可以是对象，变量，数组等
+
+main.js(/vsc_project/main.js)中调用模块暴露的函数：
+var greet = require('./hello.js');//如果只写hello，Node会依次在内置模块、全局模块和当前模块下查找hello.js
+var s = 'nick';
+greet(s);
+
+注意main.js放在工程目录/vsc_project目录时launch.json需要修改　--这里launch.json只有一个，所有调试不同的js文件时就要做修改，是否有其他用法？
+
+CommonJS规范
+javascript中不同模块可能定义了相同的全局变量，造成使用和修改的冲突．
+nodejs避免这种情况，原理：利用了闭包，把一段JavaScript代码用一个函数包装起来，这段代码的所有“全局”变量就变成了函数内部的局部变量。
+
+原理理解：待深入
+
+基本模块：nodejs内置的常用模块
+1. global 全局对象，类似js的window
+
+node交互环境中：
+> global.console
+Console {
+  log: [Function: bound log],
+  info: [Function: bound log],
+  warn: [Function: bound warn],
+  error: [Function: bound warn],
+  dir: [Function: bound dir],
+  time: [Function: bound time],
+  timeEnd: [Function: bound timeEnd],
+  trace: [Function: bound trace],
+  assert: [Function: bound assert],
+  Console: [Function: Console] }
+
+2. process
+代表当前Node.js进程
+> global.process 也可查看详细信息
+
+> process === global.process
+true
+> process.version
+'v7.6.0'
+> process.platform
+'linux'
+> process.arch
+'x64'
+> process.cwd()
+'/home/nick/work/signapk'　//查看当前工作目录
+
+test.js
+// process.nextTick()将在下一轮事件循环中调用:
+process.nextTick(function () {
+    console.log('nextTick callback!');　--后打印
+});
+console.log('nextTick was set!'); --这里先打印
+
+判断javascript环境(是在浏览器中执行还是在Node.js中执行)
+detectEnv.js:
+'use strict'
+
+if(typeof(window) === 'undefined'){
+    console.log("Node.js environment");
+}else{
+    console.log("Browser environment");
+}
+
+内置的fs模块 -- 文件系统模块
+fs提供了异步和同步的方法
+
+jQuery中的异步方法：
+$.getJSON('http://example.com/ajax',function(data){
+	console.log('IO结果返回后执行...');
+});
+
+同步方法：
+var data = getJSONSync('http://example.com.ajax');
+
+fs异步读文件：
+NODEJS
+ -vsc_project
+  -fs
+   -readTextAync.js：
+
+'use strict'
+
+var fs = require('fs');
+fs.readFile('./vsc_project/fs/sample.txt','utf-8',function(err,data){
+    if(err){
+        console.log(err);
+    }else{
+        console.log(data);
+    }
+})
+
+注意：按照网上教程，这里sample.txt放在同级下，写成fs.readFile('sample.txt')时会提示找不到(sample.txt放在根目录下可以找到)
+
+fs异步读取二进制文件
+上面例子中第二个参数'utf-8'不写的时候，data返回的是Buffer对象，字节数组
+	console.log(data);
+        console.log('length: ' + data.length + ' bytes');
+
+        //Buffer转换为String
+        var text = data.toString('utf-8');
+        console.log('Buffer to String: ' + text);
+
+        //String转换为Buffer
+        var buf = Buffer.from(text,'utf-8');
+      //  console.log('String to Buffer: ' + buf);//这种写法，buf会被换成string打印
+        console.log('String to Buffer: ');
+        console.log('String to Buffer: ' + buf);
+
+fs同步读取文件：
+ var data = fs.readFileSync('./vsc_project/fs/sample.txt','utf-8');
+ console.log(data);
+
+fs异步写文件：
+var fs = require('fs');
+var data = 'nodejs aync';
+//output.txt会被写到根目录下
+fs.writeFile('output.txt',data,function(err){
+    if(err){
+        console.log(err);
+    }else{
+        console.log('write successfully!');
+    }
+});
+
+同步写文件：
+fs.writeFileSync('output.txt',data);
+
+追加到文件尾部？：
+var fs = require('fs');
+var data = '\nappend to file';
+//追加到文件尾部
+fs.appendFile('output.txt',data,function(err){
+    if(err){
+        console.log(err);
+    }else{
+        console.log('ok');
+    }
+})
+
+如果该文件不存在，则会创建并写入data
+
+
+获取文件信息stat
+var fs = require('fs');
+fs.stat('output.txt',function(err,stat){
+    if(err){
+        console.log(err);
+    }else{
+        //是否是文件
+        console.log('is file ? ' + stat.isFile());
+        //是否是目录
+        console.log('is directory ? ' + stat.isDirectory());
+        if(stat.isFile()){
+            //文件大小
+            console.log('file size: ' + stat.size);
+            //文件创建时间
+            console.log('file birth time: ' + stat.birthtime);
+            //文件修改时间
+            console.log('file modify time: ' + stat.mtime);
+        }
+    }
+})
+
+同步获取：
+var fs = require('fs');
+var stat = fs.statSync('output.txt');
+if(stat){
+    //是否是文件
+    console.log('is file ? ' + stat.isFile());
+    //是否是目录
+    console.log('is directory ? ' + stat.isDirectory());
+    if(stat.isFile()){
+        //文件大小
+        console.log('file size: ' + stat.size);
+        //文件创建时间
+        console.log('file birth time: ' + stat.birthtime);
+        //文件修改时间
+        console.log('file modify time: ' + stat.mtime);
+    }
+}
+
+stream流读取文件：
+'use strict'
+
+var encode = 'utf-8';
+var fs = require('fs');
+
+//打开流
+var rs = fs.createReadStream('./vsc_project/fs/sampleRead.txt', encode);
+
+//data事件即读取流事件，文件内容多的时候可能多次
+rs.on('data',function(chunk){
+    console.log('DATA');
+    console.log(chunk);
+});
+
+//读取结束
+rs.on('end',function(){
+    console.log('END');
+});
+
+//比如文件名不存在，会走到这里
+rs.on('error',function(err){
+    console.log('ERROR' + err);
+});
+
+stream流写入文件：
+'use strict'
+
+var encode = 'utf-8';
+
+var fs = require('fs');
+
+var ws = fs.createWriteStream('./vsc_project/fs/sampleWriteStream.txt',encode);
+ws.write('以文本形式写入流\n',encode);
+ws.write('END.',encode);
+ws.end();
+
+var ws2 = fs.createWriteStream('./vsc_project/fs/sampleWriteStream2.txt',encode);
+ws2.write(new Buffer('以二进制形式写入流\n',encode));
+ws2.write(new Buffer('END.',encode));
+ws2.end();
+
+pipe将读取流与写入流串起来：
+'use strict'
+
+var encode = 'utf-8';
+var rootDir = './vsc_project/fs/'
+
+var fs = require('fs');
+var rs = fs.createReadStream(rootDir + 'sampleRead.txt', encode);
+
+var ws = fs.createWriteStream(rootDir + 'pipeStream.txt', encode);
+
+rs.pipe(ws);
+
+pipe后不关闭：
+'use strict'
+
+var encode = 'utf-8';
+var rootDir = './vsc_project/fs/'
+
+var fs = require('fs');
+var rs = fs.createReadStream(rootDir + 'sampleRead.txt', encode);
+
+var ws = fs.createWriteStream(rootDir + 'pipeStream.txt', encode);
+
+//写完则关闭流
+// rs.pipe(ws);
+
+//不关闭ws
+rs.pipe(ws,{end:false});
+ws.write('\n继续写入.\n',encode);
+
+//ws.end()这句会报错，原因是流操作为异步，事实上pipe会在这之后执行，如果end那么pipe执行会报错．
+//思考：如何更好的控制呢？比如pipe先执行，什么时候应该end了？
+//目前合理的方法应该是分开执行
+// ws.end();
+
+HTTP模块:
+创建server
+'use strict'
+
+//导入http模块
+var http = require('http');
+
+//创建http server
+var server = http.createServer(function(request,response){
+    //获取请求的方法和url
+    console.log(request.method + ':' + request.url);
+    //响应头
+    response.writeHead(200,{'Content-Type':'text/html'});
+    //响应的页面内容
+    response.end('<h1>Hello NodeJS</h1>');
+});
+
+//监听8080端口
+server.listen(8080);
+
+console.log('Server is running at http://127.0.0.1:8080');
+
+运行，浏览器中访问：localhost:8080
+
+文件服务器
+
+parse url:
+'use strict'
+
+var url = require('url');
+
+//测试url的parse结果
+console.log(url.parse('http://user:pass@host.com:8080/path/to/file?query=string#hash'));
+
+//结果如下：
+// Url {
+//     protocol: 'http:',
+//     slashes: true,
+//     auth: 'user:pass',
+//     host: 'host.com:8080',
+//     port: '8080',
+//     hostname: 'host.com',
+//     hash: '#hash',
+//     search: '?query=string',
+//     query: 'query=string',
+//     pathname: '/path/to/file',
+//     path: '/path/to/file?query=string',
+//     href: 'http://user:pass@host.com:8080/path/to/file?query=string#hash' }
+
+file_server.js实现：
+'use strict'
+
+var
+    fs = require('fs'),  //注意定义多个变量使用,隔开
+    url = require('url'),
+    path = require('path'),
+    http = require('http');
+
+//获取root目录，默认为当前路径(当前ubuntu上：/home/nick/work/nodejs)
+//process.argv[2] 输出：undefined
+var root = path.resolve(process.argv[2] || '.');
+console.log('Static root dir: ' + root);
+
+//创建http server
+var server = http.createServer(function(request,response){
+    //获取请求的方法和url
+    console.log(request.method + ':' + request.url);
+
+    //获取请求url中的pathname
+    //本例中请求url为http://localhost:8080/index.html
+    //pathname为:/index.html
+    var pathname = url.parse(request.url).pathname;
+    //获取本地对应的文件路径
+    // var filepath = path.join(root,pathname);
+
+    //扩展：本例中静态页面index.html放到static目录下，所以需要将文件路径转换下
+    //这里使用path转换后，就不需要考虑是linux系统还是windows系统了
+    //note: pathname这里是'/index.html'　使用'index.html'效果是一样的; 'static'与'/static'也一样
+    var filepath = path.join(root,'static',pathname);
+
+    //获取文件状态
+    fs.stat(filepath,function(err,stats){
+        if(!err && stats.isFile()){//文件获取成功
+            console.log('200' + request.url);
+            //返回200状态
+            response.writeHead('200');
+            //文件流写入response中
+            fs.createReadStream(filepath).pipe(response);
+        }else{
+            console.log('404' + request.url);
+            //返回404状态
+            response.writeHead('404');
+            response.end('404 Not Found');//response对象是一个Writable Stream,不用pipe时需要end()
+        }
+    });
+});
+
+//监听8080端口
+server.listen(8080);
+
+console.log('Server is running at http://127.0.0.1:8080');
+
+// 本例console打印：
+// GET:/index.html
+// 200/index.html
+// GET:/css/uikit.min.css
+// GET:/js/jquery.min.js
+// 200/css/uikit.min.css
+// 200/js/jquery.min.js
+// GET:/fonts/fontawesome-webfont.woff2
+// 200/fonts/fontawesome-webfont.woff2
+
+改写为请求是目录的时候，在目录下读取是否有index.html或者default.html文件，如果有返回该页面.
+//file_server.js中的请求方式改为目录，查找目录下如果存在index.html或者default.html则返回
+'use strict'
+
+var
+    fs = require('fs'),  //注意定义多个变量使用,隔开
+    url = require('url'),
+    path = require('path'),
+    http = require('http')
+
+//获取root目录，默认为当前路径(当前ubuntu上：/home/nick/work/nodejs)
+//process.argv[2] 输出：undefined
+var root = path.resolve(process.argv[2] || '.')
+console.log('Static root dir: ' + root)
+
+//创建http server
+var server = http.createServer(function(request,response){
+    //获取请求的方法和url
+    console.log(request.method + ':' + request.url)
+
+    //获取请求url中的pathname
+    //本例中请求url为http://localhost:8080
+    //pathname为:/index.html
+    var pathname = url.parse(request.url).pathname
+    //获取本地对应的文件路径
+    // var filepath = path.join(root,pathname);
+
+    //扩展：本例中静态页面index.html放到static目录下，所以需要将文件路径转换下
+    //这里使用path转换后，就不需要考虑是linux系统还是windows系统了
+    //note: pathname这里是'/index.html'　使用'index.html'效果是一样的; 'static'与'/static'也一样
+    var filepath = path.join(root,'static',pathname)
+
+    //获取文件状态
+    fs.stat(filepath,function(err,stats){
+        if(!err && stats.isFile()){//文件获取成功
+            success(filepath,request,response)
+        }else if(!err && stats.isDirectory()){
+            fs.readdir(filepath,function(err,files){
+                if(err){
+                    fail(request,response)
+                }else if(files.includes('index.html')){
+                    filepath = path.join(filepath,'index.html')
+                    success(filepath,request,response)
+                }else if(files.includes('default.html')){
+                    filepath = path.join(filepath,'default.html')
+                    success(filepath,request,response)
+                }
+            })
+        }else{
+           fail(request,response)
+        }
+    })
+})
+
+function success(filepath,request,response){
+    console.log('200' + request.url)
+    //返回200状态
+    response.writeHead('200')
+    //文件流写入response中
+    fs.createReadStream(filepath).pipe(response)
+}
+
+function fail(request,response){
+    console.log('404' + request.url)
+    //返回404状态
+    response.writeHead('404')
+    response.end('404 Not Found')//response对象是一个Writable Stream,不用pipe时需要end()
+}
+
+
+
+//监听8080端口
+server.listen(8080)
+
+console.log('Server is running at http://127.0.0.1:8080')
+
+// 本例console打印：
+// GET:/index.html
+// 200/index.html
+// GET:/css/uikit.min.css
+// GET:/js/jquery.min.js
+// 200/css/uikit.min.css
+// 200/js/jquery.min.js
+// GET:/fonts/fontawesome-webfont.woff2
+// 200/fonts/fontawesome-webfont.woff2
+
+静态页面分析index.html：
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Index</title>
+    <link rel="stylesheet" href="css/uikit.min.css" />
+    <script src="js/jquery.min.js"></script>
+    <script>
+    $(function () {
+        $('#code').click(function () {
+            window.open('https://github.com/michaelliao/learn-javascript/tree/master/samples/node/http');
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <div id="header" class="uk-navbar uk-navbar-attached">
+        <div class="uk-container x-container">
+            <div class="uk-navbar uk-navbar-attached">
+                <a href="index.html" class="uk-navbar-brand"><i class="uk-icon-home"></i> Learn Nodejs</a>
+                <ul id="ul-navbar" class="uk-navbar-nav">
+                    <li><a target="_blank" href="http://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000">JavaScript教程</a></li>
+                    <li><a target="_blank" href="http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000">Python教程</a></li>
+                    <li><a target="_blank" href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000">Git教程</a></li>                    
+                </ul>
+            </div>
+        </div>
+    </div><!-- // header -->
+
+    <div id="main">
+        <div class="uk-container">
+            <div class="uk-grid">
+                <div class="uk-width-1-1 uk-margin">
+                    <h1>Welcome</h1>
+                    <p><button id="code" class="uk-button uk-button-primary">Show me the code</button></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer">
+        <div class="uk-container">
+            <hr>
+            <div class="uk-grid">
+                <div class="uk-width-1-1">
+                    <p>Copyright&copy;2015-2016</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+1. <link rel="stylesheet" href="css/uikit.min.css" />
+UIKit前端框架，与EasyUI,MUI和bootstrap类似．
+http://www.getuikit.net/index.html
+http://blog.csdn.net/tr1912/article/details/53700788
+
+这里用到UIKit基本样式： uikit.css / uikit.min.css(压缩)
+js:  uikit.js / uikit.min.js(压缩)
+
+也可以从地址引用：
+<link rel="stylesheet" href="//cdn.bootcss.com/uikit/2.25.0/css/uikit.css" />
+<script src="//cdn.bootcss.com/uikit/2.25.0/js/uikit.js"></script>
+
+配合jQuery使用，比如（本例中下载到本地使用，jquery引用要在uikit.js引用之前）：
+<script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script> 
+
+可以实现定制（在线修改各组件样式，生成对应的css文件，下载后使用）
+
+2. jquery用法：
+　　　　<script src="js/jquery.min.js"></script>
+    <script>
+    $(function () {
+        $('#code').click(function () {
+            window.open('https://github.com/michaelliao/learn-javascript/tree/master/samples/node/http');
+        });
+    });
+    </script>
+
+加密模块crypto：
+
+web开发：
+概念理解：静态web页面　动态web页面　MVC 
+Web框架：koa
+
+koa历史:
+1.前身：Express 对Node.js的http进行了封装，基于ES5语法.
+使用回调实现异步,比如async库
+2.koa 1.0 支持ES6,使用generator实现异步
+3.koa2 基于ES7,完成使用Promise并配合async实现异步
+
+koa2学习：
+koa包安装方法：
+1. 所需目录下(这里是/vsc_project/koa)运行命令:npm install koa@2.0.0
+等待即可，成功后生成目录node_modules
+注意：koa的node_modules目录不要提交到git上
+
+2. 使用配置文件，这里换个目录测试/hello_koa,　新建package.json：
+{
+    "name": "hello-koa2",
+    "version":"1.0.0",
+    "description": "Hello Koa 2 example with async",
+    "author": "nick",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "koa": "2.0.0"
+    }
+}
+
+dependencies为必须，其他可选．该目录下运行：npm install
+同样，成功后生成node_modules
+
+＊第2种方法推荐使用
+
+以hello-koa为例继续，将koa目录删除不用
+
+koa使用，app.js:
+'use strict'
+
+//导入Koa class,故大写
+const Koa = require('koa')
+//创建对象
+const app = new Koa()
+
+//调用异步函数处理请求
+app.use(async(ctx,next)=>{
+    await next()
+    //设置Content-Type
+    ctx.response.type = 'text/html'
+    //设置内容
+    ctx.response.body = '<h1>Hello Koa</h1>'
+})
+
+//端口3000监听
+app.listen(3000)
+console.log('app started at port 3000...')
+
+ctx封装了request和response
+next()是koa传入的将要处理的下一个异步函数
+
+async标记异步函数，await调用另一个异步函数(如next())
+每个异步函数称为middleware，middleware组成处理链例子：
+'use strict'
+
+const Koa = require('koa')
+const app = new Koa()
+
+app.use(async(ctx, next)=>{
+    //打印请求的方法和url
+    console.log(`${ctx.request.method}${ctx.request.url}`)
+    //调用下一个middleware
+    await next()
+})
+
+app.use(async(ctx, next)=>{
+    //获取当前时间
+    const start = new Date().getTime();
+    //调用下一个middleware
+    await next()
+    //耗费时间
+    const ms = new Date().getTime() - start 
+    console.log(`Time:${ms}ms`)
+})
+
+app.use(async(ctx, next)=>{
+    //调用下一个middleware
+    await next()
+    console.log('response')
+    ctx.response.type = 'Text/Html'        
+    ctx.response.body = '<h1>Hello koa2!</h1>'
+})
+
+app.listen(3000)
+console.log('app started at port 3000...')
+
+注意理解：调用app.use()的顺序决定了middleware的顺序
+理解：遇到await next()的时候就会跑去处理下一个middleware(即异步函数),
+上面的例子中顺序为（请求localhost:3000）：
+GET/
+response
+Time:2ms
+
+更改上面例子为：
+app.use(async(ctx, next)=>{
+    //调用下一个middleware
+    await next()
+    //打印请求的方法和url
+    console.log(`${ctx.request.method}${ctx.request.url}`)
+})
+
+那么顺序变为：
+response
+Time:2ms
+GET/
+
+理解：遇到await next()则处理下一个middleware，到最后一个时没有下一个则最后一个开始处理，然后依次返回．
+所以如果将第三个app.use中的await next()注释掉，效果是一样的
+
+再更改：
+将第二个中的await next()注释，那么不会返回response,只有输出：
+Time:0ms
+GET/
+
+检测用户权限例子(checkUserPermission()方法分别模拟返回true/false，查看输出结果)：
+'use strict'
+
+//导入Koa class,故大写
+const Koa = require('koa')
+//创建对象
+const app = new Koa()
+
+//调用异步函数处理请求
+app.use(async(ctx,next)=>{
+    if(await checkUserPermission(ctx)){
+        await next()
+        //设置Content-Type
+        ctx.response.type = 'text/html'
+        //设置内容
+        ctx.response.body = '<h1>Hello Koa</h1>'
+    }else{
+        ctx.response.status = 403;
+    }
+})
+
+function checkUserPermission(ctx){
+    return false;
+};
+
+//端口3000监听
+app.listen(3000)
+console.log('app started at port 3000...')
+
+结果：
+return false时返回403状态，浏览器提示Forbidden
+return true则正常返回response
+该例子日后可扩展
+
+简写：ctx.url相当于ctx.request.url,　ctx.type相当于ctx.response.type
+
+处理URL映射的middleware: koa-router
+(根据不同的url返回对应的内容)
+
+安装：
+1. hello-koa复制为url-koa,保留package.json,app.js以及node_modules
+2. package.json中添加"koa-router": "7.0.0"：
+    "dependencies": {
+        "koa": "2.0.0",
+        "koa-router": "7.0.0"
+    }
+3. url-koa目录下运行命令：npm install, 成功后可以在node_modules下看到koa-router目录
+修改app.js,使用router来处理url:
+
+'use strict'
+
+//导入Koa class,故大写
+const Koa = require('koa');
+
+//返回的是函数
+const router = require('koa-router')();
+//创建对象
+const app = new Koa();
+
+//调用异步函数处理请求
+app.use(async(ctx,next)=>{
+    console.log(`Process${ctx.request.method}${ctx.request.url}`);
+    await next();
+});
+
+router.get('/hello/:name',async(ctx,next)=>{
+    var name = ctx.params.name;
+    ctx.response.body = `<h1>hello,${name}!</h1>`;
+});
+
+router.get('/',async(ctx,next)=>{
+    ctx.response.body = '<h1>index!</h1>';
+});
+
+//添加router
+app.use(router.routes());
+
+//端口3000监听
+app.listen(3000);
+console.log('app started at port 3000...');
+
+
+以上请求为:localhost:3000时，内容为:index
+请求为localhost:3000/hello/nick,内容为：hello,nick!
+
+注意用法：
+1. 导入函数:
+2. 获取请求的参数: ctx.params.name
+3. router用法：router.get注册Ｇｅｔ请求, app.use(router.routes())添加router这个middleware
+
+处理Post请求：
+post请求通常会发送表单或JSON,需求解析，导入koa-bodyparser：
+修改package.json：
+"dependencies": {
+        "koa": "2.0.0",
+        "koa-router": "7.0.0",
+        "koa-bodyparser": "3.2.0"
+    }
+
+运行：npm install
+
+例子：
+'use strict'
+
+//导入Koa class,故大写
+const Koa = require('koa');
+
+//返回的是函数
+const router = require('koa-router')();
+
+const bodyParser = require('koa-bodyparser');
+
+//创建对象
+const app = new Koa();
+
+app.use(bodyParser());
+
+//调用异步函数处理请求
+app.use(async(ctx,next)=>{
+    console.log(`Process ${ctx.request.method}${ctx.request.url}`);
+    await next();
+});
+
+//返回表单提交用户名密码后转到执行post
+router.get('/signin',async(ctx,next)=>{
+    ctx.response.body = `<h1>Log in!</h1>
+    <form action="/signin-verify" method="post">
+        <p>Name:<input name="name" value="koa"></p>
+        <p>Password:<input name="password" type="password"></p>
+        <p><input type="submit" value="Submit"></p>
+    </form>`;
+});
+
+router.post('/signin-verify',async(ctx,next)=>{
+    var
+        name = ctx.request.body.name || '',//注意从request的body中获取,默认为''
+        password = ctx.request.body.password || '';
+
+    console.log(`login name:${name},password:${password}`);
+    if(name === 'koa' && password === '12345'){
+        ctx.response.body = `<h1>Hello,${name}</h1>`;
+    }else{
+        ctx.response.body = `<h1>Login failed</h1>
+        <p><a href="/signin">Try again</a></p>`;
+    }
+});
+
+//添加router
+app.use(router.routes());
+
+//端口3000监听
+app.listen(3000);
+console.log('app started at port 3000...');
+
+同样，router可处理put delete head请求
+
+重构：分离各自url的处理，让app.js自动导入
+controller.js用来寻找url对应的js和处理url
+app.js中导入controller:
+
+controller.js:
+'use strict'
+
+var fs = require('fs');
+
+function addCtrollers(router,dir){
+    //这里使用同步读取，因为app.js初始化只执行一次，无性能问题
+    // var files = fs.readdirSync(__dirname + '/' + dir);
+
+    // //过滤出js文件
+    // var js_files = files.filter((f)=>{
+    //     return f.endsWith('.js');
+
+    // //导入模块
+    // for(var f of js_files){
+    //     let mapping = require(__dirname + '/controller/' + f);
+    //     addMapping(router,mapping);
+    // };
+
+    //以上简写：
+    var path = __dirname + '/' + dir;
+    fs.readdirSync(path).filter((f)=>{
+      return f.endsWith('.js');
+    }).forEach((f)=>{
+        let mapping = require(path + '/' + f);
+        addMapping(router,mapping);
+    });
+};
+
+function addMapping(router, mapping){
+    for(var url in mapping){
+        if(url.startsWith('GET')){
+            var path = url.substring(4);
+            router.get(path,mapping[url]);
+            console.log(`register URL mapping:GET ${path} `);
+        }else if(url.startsWith('POST')){
+            var path = url.substring(5);
+            router.post(path,mapping[url]);
+            console.log(`register URL mapping:POST ${path} `);
+        }else{
+            console.log(`invalid url: ${url} `);
+        }
+    }
+};
+
+module.exports = function(dir){
+    let 
+        controller_dir = dir || 'controller',
+        router = require('koa-router')();
+
+    addCtrollers(router, controller_dir);
+    return router.routes();
+}
+
+app.js:
+'use strict'
+
+//导入Koa class,故大写
+const Koa = require('koa');
+const app = new Koa();
+
+const bodyParser = require('koa-bodyparser');
+const controller = require('./controller');
+
+//调用异步函数处理请求
+app.use(async(ctx,next)=>{
+    console.log(`Process${ctx.request.method}${ctx.request.url}`);
+    await next();
+});
+
+
+app.use(bodyParser());
+
+//添加controller,可传入路径
+app.use(controller());
+
+//端口3000监听
+app.listen(3000);
+console.log('app started at port 3000...');
+
+以上可作为增加url和处理的架构．
+
+模板引擎 Nunjucks(用于后台node端，浏览器端使用MVVM框架)
+基于模板输出html
+Nunjucks就是js实现的python中的jinjia2
+使用模式：
+function render(view,model){
+}
+
+使用nunjucks可避免model中注入恶意script脚本执行的问题．
+
+安装，在package.json中添加：
+"dependencies": {
+       "nunjucks":"2.4.2"
+    }
+
+终端运行：npm install
+
+初始化nunjucks，获取模板引擎对象env：
+
+const nunjucks = require('nunjucks');
+
+//从opts中获取各属性值(没有则设置默认值)，并初始化nunjucks
+function createEnv(path,opts){
+    var
+        autoescape = opts.autoescape === undefined ? true : opts.autoescape,
+        noCache = opts.noCache || false,
+        watch = opts.watch || false,
+        throwOnUndefined = opts.throwOnUndefined || false,
+        env = new nunjucks.Environment(
+            new nunjucks.FileSystemLoader(path,{
+                noCache:noCache,
+                watch:watch
+            }),{
+                autoescape:autoescape,
+                throwOnUndefined:throwOnUndefined
+            }
+        );
+        if(opts.filters){
+            for(var f in opts.filters){
+                env.addFilter(f,opts.filters[f]);
+            }
+        }
+        return env;
+};
+
+//'views'为路径，当前路径下的views目录
+var env = createEnv('views',{
+    watch:true,
+    filters:{//定义filters
+        hex:function(n){//filter名称hex,返回16进制字符串
+            return '0x' + n.toString(16);
+        }
+    }
+});
+
+views目录下hello.html中演示了如何使用nunjucks的model中的变量与filter,以及for循环用法:
+<html>
+    <head>
+        <title>Hello {{name}}</title>
+    </head>
+    <body>
+        <h3>Fruits List</h3>
+        {% for f in fruits %}
+        <p>{{f}}</p>
+        {% endfor %}
+        <p>total: {{count|hex}}</p>
+    </body>
+</html>
+
+调用：
+var s = env.render('hello.html',{
+    name:'nick',
+    fruits:['apple','pear','banana'],
+    count:10000
+})
+
+console.log(s);
+
+注意：这里运行app.js，如果是在vsc中修改launch.json运行会报错找不到hello.html.
+只能在终端运行use-nunjucks目录下运行：node app.js　才可以．
+原因？
+
+使用模板base.html:
+<html>
+    <body>
+        {% block header %} <h3>Unnamed</h3> {% endblock %}
+        {% block body %} <div>No body</div> {% endblock %}
+        {% block footer %} <div>copyright.</div> {% endblock %}
+    </body>
+</html>
+
+extend.html继承自base.html,重写header和body部分:
+{% extends 'base.html' %}
+{% block header %} <h1>{{header}}</h1> {% endblock %}
+{% block body %} <p>{{body}}</p> {% endblock %}
+
+用法：
+console.log(env.render('extend.html',{
+    header:'Extend',
+    body:'hello, nick'
+}));
+
+注意：nunjucks一般使用同步读取的方式，性能考虑要打开cache,设置noCache为false.
+如果是开发模式，可关闭cache, 可重新加载模板便于实时修改模板．
+
+使用MVC,结合koa和nunjucks
+ctx.render(...)
+controller为koa异步处理url,然后通过nunjucks把输入的model用模板渲染成html输出．MVC模式．
+
+工程view-koa,增加配置：
+"dependencies": {
+        "koa": "2.0.0",
+        "koa-bodyparser": "3.2.0",
+        "koa-router": "7.0.0",
+        "nunjucks": "2.4.2",
+        "mime": "1.3.4",
+        "mz": "2.4.0"
+    }
+
+架构分析：
+index.html为主页,使用index.js处理Get请求
+主页上可输入email地址和密码进行登录，对应登录成功（signin-ok.html）和登录失败(signin-failed.html)的页面，使用signin.js处理Post请求
+
+view中的页面index.html,sigin-ok.html和signin-failed.html都继承自base.html, 使用CSS框架Bootstrap来编写html页面．
+下载zip后将静态资源放到static下（css,fonts,js）
+html中引用：<link rel="stylesheet" href="/static/css/bootstrap.css">
+
+static的处理：静态文件，是在开发环境时nodejs通过使用koa来处理．
+如果是正式发布，需要由部署在最前面的反向代理服务器（如Nginx）来处理，nodejs不需要处理，研究怎么实现？
+具体使用待定，研究如何使用UIkit来替代Bootstrap完成前端开发．
+
+base.html的body中预定义了：{% block main %} {% endblock %}
+index.html,sigin-ok.html和signin-failed.html分别重写该部分，实现各自的处理，前端页面的实现之后再继续．
+
+koa部分：
+参照url2-koa，在controller目录下创建index.js：
+'use strict'
+
+module.exports = {
+    'GET /':async(ctx,next)=>{
+        ctx.render('index.html',{
+            title:'Welcome'
+        })
+    }
+}
+
+这里ctx.render默认不存在，需要通过nunjucks对其进行创建，见下面的nunjucks部分．
+title是base.html中通过model来更新的变量．
+
+nunjucks部分：
+参照use-nunjucks,新建templating.js:
+创建ctx.render,将view与model传递给ctx的controller处理，即完成MVC模型
+'use strict'
+
+const nunjucks = require('nunjucks');
+
+//从opts中获取各属性值(没有则设置默认值)，并初始化nunjucks
+function createEnv(path,opts){
+    var
+        autoescape = opts.autoescape === undefined ? true : opts.autoescape,
+        noCache = opts.noCache || false,
+        watch = opts.watch || false,
+        throwOnUndefined = opts.throwOnUndefined || false,
+        env = new nunjucks.Environment(
+            new nunjucks.FileSystemLoader(path,{
+                noCache:noCache,
+                watch:watch
+            }),{
+                autoescape:autoescape,
+                throwOnUndefined:throwOnUndefined
+            }
+        );
+        if(opts.filters){
+            for(var f in opts.filters){
+                env.addFilter(f,opts.filters[f]);
+            }
+        }
+        return env;
+};
+
+//给'ctx'设置render函数
+function templating(path,opts){
+    var env = createEnv(path,opts);
+    return async(ctx,next)=>{
+        ctx.render = function(view,model){
+            //Object.assign({}, ctx.state || {}, model || {})使用是为了扩展model.
+            //三个参数，将第二个与第三个参数的所有属性放到第一个参数中，可以将ctx.state这个公共变量传给每一个view来处理
+            ctx.response.body = env.render(view, Object.assign({}, ctx.state || {}, model || {}));
+            ctx.response.type = 'text/html';
+        }
+        await next();
+    };
+};
+
+//'views'为路径，当前路径下的views目录
+// var env = createEnv('views',{
+//     watch:true,
+//     filters:{//定义filters
+//         hex:function(n){//filter名称hex,返回16进制字符串
+//             return '0x' + n.toString(16);
+//         }
+//     }
+// });
+
+module.exports = templating;
+
+ctx.state使用的举例说明，比如有个middleware用来检查用户权限：
+app.use(async (ctx, next) => {
+    var user = tryGetUserFromCookie(ctx.request);
+    if (user) {
+        ctx.state.user = user;
+        await next();
+    } else {
+        ctx.response.status = 403;
+    }
+});
+
+只有用户权限检查通过才处理下一个middleware.
+
+app.js中使用：
+在controller使用前，先使用templating这个middleware:
+
+app.use(templating('views',{
+    watch:false
+}))
+
+//添加controller,可传入路径
+app.use(controller());
+
+以上为处理index.js的url　GET请求，添加signin的POST请求，同理，在controller下增加signin.js的处理即可：
+'use strict'
+
+module.exports = {
+    'POST /signin':async(ctx,next)=>{
+        var
+            email = ctx.request.body.email || '',
+            password = ctx.request.body.password || '';
+
+        console.log(`login email:${email},password:${password}`);
+        if(email === 'admin@example.com' && password === '123456'){
+            console.log('sign in ok');
+            ctx.render('signin-ok.html',{
+                title:'Sign in OK'
+            });
+        }else{
+            console.log('sign in failed');
+            ctx.render('signin-failed.html',{
+                title:'Sign in failed'
+            })
+        }
+    }
+}
+
+完整的app.js:
+'use strict'
+
+//导入Koa class,故大写
+const Koa = require('koa');
+const app = new Koa();
+
+const bodyParser = require('koa-bodyparser');
+const controller = require('./controller');
+
+const templating = require('./templating');
+//判断是否是正式环境，正式环境一定要配置为production.
+//问题：如何配置？在launch.json中配置，当前为development，正式环境需要修改为production
+const isProduction = process.env.NODE_ENV === 'production';
+
+//调用异步函数处理请求
+app.use(async(ctx,next)=>{
+    console.log(`Process${ctx.request.method}${ctx.request.url}`);
+    var
+        startTime = new Date().getTime(),
+        execTime;
+    await next();
+    execTime = new Date().getTime() - startTime;
+    console.log(`The response time: ${execTime}ms`);
+});
+
+if(!isProduction){
+    let staticFiles = require('./static-files');
+    app.use(staticFiles('/static/',__dirname + '/static'));
+}
+
+app.use(bodyParser());
+
+app.use(templating('views',{
+    noCache:!isProduction,//正式环境需要缓存，开发环境不需要
+    watch:!isProduction
+}))
+
+//添加controller,可传入路径
+app.use(controller());
+
+//端口3000监听
+app.listen(3000);
+console.log('app started at port 3000...');
+
+staticFiles的实现，static-files.js:
+'use strict'
+
+const path = require('path');
+const mime = require('mime');
+const fs = require('mz/fs');
+
+function staticFiles(url, dir) {
+    return async (ctx, next) => {
+        let rpath = ctx.request.path;
+        console.log(`static request path: ${rpath}`);
+        if (rpath.startsWith(url)) {
+            let fp = path.join(dir, rpath.substring(url.length));
+            console.log(`deal static file: ${fp}`);
+            if (await fs.exists(fp)) {
+                ctx.response.type = mime.lookup(rpath);//如何实现？
+                ctx.response.body = await fs.readFile(fp);
+            } else {
+                ctx.response.status = 404;
+            }
+        } else {
+            await next();
+        }
+    };
+}
+
+module.exports = staticFiles;
+
+对比使用和不使用staticFiles时index.html不同的页面效果：
+1. 样式
+2. h5的自适应
+
+如何理解?
+1.不通过nodejs返回页面，直接打开base.html,发现是没有Bootstrap效果，因为不会去加载css和js.页面代码是：
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="learn javascript by www.liaoxuefeng.com">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <script src="/static/js/bootstrap.js"></script>
+</head>
+2.如果将上面代码改为如下，则直接运行就可以看到Bootstrap效果：
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="learn javascript by www.liaoxuefeng.com">
+    <title>{{ title }}</title>
+    <!-- 引入 Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+所以，上面所说的正式环境通过反向代理服务器来处理应该就是第２种方式，搜索nginx，比如百度等支持．jquery引入的时候就是百度的地址．
+那么可以理解为，只要外网连接正常，不管开发环境还是正式环境都直接用第２种引入的方式应该是最方便的．
+而如果开发环境没有外网，那么只能用第１种方式来调试开发了，相当与离线的方法，所以需要通过staticFiles这个中间件来处理．
+理解了，万岁～
+
+下面分析Bootstrap如何实现样式和自适应：
+base.html分析：
+<!DOCTYPE html>　//html5的使用方式
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1"> //根据设备的大小自适应，不缩放
+    <meta name="description" content="learn javascript by www.liaoxuefeng.com">　//应该无意义
+    <title>{{ title }}</title>　//nunjucks的model对应
+    <link rel="stylesheet" href="/static/css/bootstrap.css">　//引入的外部css文件，定义各种样式
+    <script src="/static/js/bootstrap.js"></script> //引入的外部js文件
+</head>
+
+<body>
+    <header class="navbar navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a href="/" class="navbar-brand">Learn JavaScript</a>
+            </div>
+            <nav class="collapse navbar-collapse" id="bs-navbar">
+                <ul class="nav navbar-nav">
+                    <li><a target="_blank" href="http://www.liaoxuefeng.com/">Get Courses</a></li>
+                    <li><a target="_blank" href="https://github.com/michaelliao/learn-javascript">Source Code</a></li>
+                    <li><a target="_blank" href="http://getbootstrap.com/">Resource</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div id="important" style="color:#cdbfe3; background-color:#6f5499; padding:30px 0; margin:-20px 0 20px 0;">
+        <div class="container">
+            <h1 style="color:#fff; font-size:60px">Getting started</h1>
+            <p style="font-size:24px; line-height:48px">Learn JavaScript, Node.js, npm, koa2, nunjucks, babel, etc. at liaoxuefeng.com.</p>
+        </div>
+    </div>
+    {% block main %} {% endblock %}
+    <footer style="background-color:#ddd; padding: 20px 0;">
+        <div class="container">
+            <p>
+                <a target="_blank" href="http://www.liaoxuefeng.com">Website</a> - 
+                <a target="_blank" href="https://github.com/michaelliao/learn-javascript">GitHub</a> - 
+                <a target="_blank" href="http://weibo.com/liaoxuefeng">Weibo</a>
+            </p>
+            <p>This JavaScript course is created by <a target="_blank" href="http://weibo.com/liaoxuefeng">@廖雪峰</a>.</p>
+            <p>Code licensed <a target="_blank" href="https://github.com/michaelliao/learn-javascript/blob/master/LICENSE">Apache</a>.</p>
+        </div>
+    </footer>
+</body>
+
+</html>
+
+css属性大全：http://www.css88.com/book/css/properties/layout/display.htm
+将bootstrap.css中的属性全过一遍
+
+mysql学习：
+Ubuntu安装mysql,由于官网下载安装包方式安装比较麻烦：mysql-server_5.6.38-1ubuntu14.04_amd64.deb-bundle.tar
+改成使用apt-get安装，步骤：
+1. cd ~
+2. sudo apt-get update
+3. sudo apt-get install mysql-server-5.6
+安装时会提示设置root密码：nick123456789
+
+安装完，查看mysql是否开启：ps -ef | grep mysql
+输出，第一行说明开启：
+mysql    12529     1  2 11:35 ?        00:00:00 /usr/sbin/mysqld
+nick     12671  6426  0 11:35 pts/13   00:00:00 grep --color=auto mysql
+
+停止：sudo service mysql stop
+再查看：ps -ef | grep mysql
+nick     12691  6426  0 11:36 pts/13   00:00:00 grep --color=auto mysql
+
+重启：sudo service mysql restart
+
+问题：修改/etc/mysql/my.cnf时修改了权限chmod 777 my.cnf（即使修改权限，也无法保存）
+发现mysql无法运行了，需要chmod 644 my.cnf，再重启：sudo service mysql restart.
+
+进入mysql: mysql -u -root -p
+输入密码后报错：ERROR 1045 (28000): Access denied for user '-root'@'localhost' (using password: YES)
+
+如何解决？进入方式有误，改为：
+mysql -u root -p
+输入密码即可
+
+如何修改mysql密码？（未验证）
+1.先关闭mysql并设置密码
+
+#sudo  /etc/init.d/mysql stop 
+#sudo  mysqld_safe --user=mysql --skip-grant-tables --skip-networking & 
+#sudo  mysql -u root mysql 
+mysql> UPDATE user SET Password=PASSWORD('pas') where USER='root'; 
+mysql> FLUSH PRIVILEGES; 
+mysql> quit 
+2.重启mysql并尝试登录
+
+#sudo  /etc/init.d/mysql restart 
+#sudo  mysql -u　root -p 
+Enter password:  
+#输入密码，出现下面这个就表示登录正常了 
+mysql> 
+
+修改编码为utf-8,先进入mysql环境：
+mysql>show variables like '%char%;
+输出：
++--------------------------+----------------------------+
+| Variable_name            | Value                      |
++--------------------------+----------------------------+
+| character_set_client     | utf8                       |
+| character_set_connection | utf8                       |
+| character_set_database   | latin1                     |
+| character_set_filesystem | binary                     |
+| character_set_results    | utf8                       |
+| character_set_server     | latin1                     |
+| character_set_system     | utf8                       |
+| character_sets_dir       | /usr/share/mysql/charsets/ |
++--------------------------+----------------------------+
+
+需要将默认编码全部改为utf-8,这里按照教程并未发现/etc/mysql/my.cnf中有设置的地方，而且上面记录中该文件无法修改．
+暂不处理，继续．
+
+访问MySQL
+1.
+nodejs程序要访问Mysql需要驱动程序，直接npm安装mysql(Mysql在node.js上的驱动程序),使用代码连接数据库：
+connection.query('SELECT * FROM users WHERE id = ?', ['123'], function(err, rows) {
+    if (err) {
+        // error
+    } else {
+        for (let row in rows) {
+            processRow(row);
+        }
+    }
+});
+
+2.
+1的方式太low了，底层直接操作数据库不好用．改为ＯＲＭ方式，就是将表映射为model.
+比如表pets:
++----+--------+------------+
+| id | name   | birth      |
++----+--------+------------+
+|  1 | Gaffey | 2007-07-07 |
+|  2 | Odie   | 2008-08-08 |
++----+--------+------------+
+
+映射为：
+{
+    "id": 1,
+    "name": "Gaffey",
+    "birth": "2007-07-07"
+}
+....
+
+框架Sequelize的使用
+进入mysql,创建测试数据库test:
+mysql>create database test;
+mysql>show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| test               |
++--------------------+
+4 rows in set (0.00 sec)
+
+创建MySQL的用户名和口令，均为www，并赋予操作test数据库的所有权限。
+mysql>grant all privileges on test.* to 'wwww'@'%' identified by 'www';
+切换数据库：
+mysql>use test;
+创建pets表：
+create table pets (
+    id varchar(50) not null,
+    name varchar(100) not null,
+    gender bool not null,
+    birth varchar(10) not null,
+    createdAt bigint not null,
+    updatedAt bigint not null,
+    version bigint not null,
+    primary key (id)
+) engine=innodb;
+
+创建工程hello-sequelize,添加配置：
+"dependencies": {
+        "koa": "2.0.0",
+        "sequelize":"3.24.1",
+        "mysql":"2.11.1"
+    }
+
+npm install安装．
+创建mysql配置文件config.js:
+var config = {
+    database: 'test', // 使用哪个数据库
+    username: 'www', // 用户名
+    password: 'www', // 口令
+    host: 'localhost', // 主机名
+    port: 3306 // 端口号，MySQL默认3306
+};
+
+module.exports = config;
+
+app.js:
+'use strict'
+
+const Sequelize = require('sequelize');
+
+const config = require('./config');
+
+console.log('init sequelize...');
+
+var sequelize = new Sequelize(config.database, config.username, config.password, {
+    host: config.host,
+    dialect: 'mysql',
+    pool: {
+        max: 5,
+        min: 0,
+        idle: 30000
+    }
+});
+
+//教程中这里用'pet'，操作的就是'pets'表，为什么？什么时候pets表映射为pet了？
+//如果创建了两张表pet和pets,这里执行后操作的也是pets表
+//如果只有一张pet表，这里操作会提示pets表不存在，百思不得其解？
+var Pet = sequelize.define('pet', {
+    id: {
+        type: Sequelize.STRING(50),
+        primaryKey: true
+    },
+    name: Sequelize.STRING(100),
+    gender: Sequelize.BOOLEAN,
+    birth: Sequelize.STRING(10),
+    createdAt: Sequelize.BIGINT,
+    updatedAt: Sequelize.BIGINT,
+    version: Sequelize.BIGINT
+}, {
+        timestamps: false
+    });
+
+var now = Date.now();
+
+Pet.create({
+    id: 'g-' + now,
+    name: 'Gaffey',
+    gender: false,
+    birth: '2007-07-07',
+    createdAt: now,
+    updatedAt: now,
+    version: 0
+}).then(function (p) {
+    console.log('created.' + JSON.stringify(p));
+}).catch(function (err) {
+    console.log('failed: ' + err);
+});
+
+(async () => {
+    var dog = await Pet.create({
+        id: 'd-' + now,
+        name: 'Odie',
+        gender: false,
+        birth: '2008-08-08',
+        createdAt: now,
+        updatedAt: now,
+        version: 0
+    });
+    console.log('created: ' + JSON.stringify(dog));
+})();
+
+(async () => {
+    var pets = await Pet.findAll({
+        where: {
+            name: 'Gaffey'
+        }
+    });
+    console.log(`find ${pets.length} pets:`);
+    for (let p of pets) {
+        console.log(JSON.stringify(p));
+        console.log('update pet...');
+        p.gender = true;
+        p.updatedAt = Date.now();
+        p.version ++;
+        await p.save();
+        if (p.version === 3) {
+            await p.destroy();
+            console.log(`${p.name} was destroyed.`);
+        }
+    }
+})();
+
+// //更新数据
+// (async () => {
+//     var p = await queryFromSomewhere();
+//     p.gender = true;
+//     p.updatedAt = Date.now();
+//     p.version ++;
+//     await p.save();
+// })();
+
+// //删除数据
+// (async () => {
+//     var p = await queryFromSomewhere();
+//     await p.destroy();
+// })();
+
+这里运行node app.js后报错：
+failed: SequelizeAccessDeniedError: ER_ACCESS_DENIED_ERROR: Access denied for user 'www'@'localhost' (using password: YES)
+
+原因是mysql中执行grant all privileges on test.* to 'wwww'@'%' identified by 'www';
+后需要运行：flush privileges;使权限设置生效
+
+执行node app.js后输出：
+init sequelize...
+Executing (default): SELECT `id`, `name`, `gender`, `birth`, `createdAt`, `updatedAt`, `version` FROM `pets` AS`pet` WHERE `pet`.`name` = 'Gaffey';
+Executing (default): INSERT INTO `pets` (`id`,`name`,`gender`,`birth`,`createdAt`,`updatedAt`,`version`) VALUES('g-1508244116374','Gaffey',false,'2007-07-07',1508244116374,1508244116374,0);
+Executing (default): INSERT INTO `pets` (`id`,`name`,`gender`,`birth`,`createdAt`,`updatedAt`,`version`) VALUES('d-1508244116374','Odie',false,'2008-08-08',1508244116374,1508244116374,0);
+find 0 pets:
+created.{"id":"g-1508244116374","name":"Gaffey","gender":false,"birth":"2007-07-07","createdAt":1508244116374,"updatedAt":1508244116374,"version":0}
+created: {"id":"d-1508244116374","name":"Odie","gender":false,"birth":"2008-08-08","createdAt":1508244116374,"updatedAt":1508244116374,"version":0}
+
+Mocha测试
+
+WebSocket:html5新增协议，浏览器与服务器之前建立无限制的双向通信
+由于ws无法安装(提示：npm ERR! network read ECONNRESET)
+先跳过，回头再试
+
+REST学习：一种设计API的模式，常用JSON格式编写REST风格的API.
+请求与响应：
+请求：
+
+MVVM:关注Model的变化，让MVVM框架去自动更新DOM的状态，从而把开发者从操作DOM的繁琐步骤中解脱出来.
+即前端页面上应用了扩展的MVC模式．
+Vue框架,相当于nunjucks，只不过nunjucks是与koa一起实现后端的mvc(用model渲染出页面)．
+而Vue是用model动态刷新页面中的DOM.
+
+
+

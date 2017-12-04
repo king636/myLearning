@@ -1,0 +1,2279 @@
+基础知识：
+Number表示整数与浮点数：
+	NaN表示无法计算结果，比如 x / 0;
+	Infinity表示无限大
+	取余的操作％：　10 % 3 结果为 1（转为整数）; 10.5 % 3　结果为 1.5（转为浮点数）;
+
+比较相等：=== (不要用==,会自动转换类型)，比如：
+	NaN === NaN : false;
+	isNaN(NaN) : true;
+	1 / 3 === (1 - 2 / 3): false;浮点数不相等
+	Math.abs(1 / 3 - (1 - 2 / 3)) < 0.000000001 : true;浮点数比较，相差无限小，认为相等
+
+null和undefined:
+undefined仅在判断函数参数是否传递的情况下有用
+
+javascript为动态语言，可以动态转换类型：
+var a = 123;//整数
+a = 'ab';//字符串
+
+字符串
+多行字符串：　`...` 支持换行
+模板字符串： `...${name}...` 引入变量name的值
+字符串操作时，字符串不可变，方法返回的是新的字符串
+方法：
+toUpperCase 大写
+toLowerCase　小写
+indexOf 搜索位置
+substring 返回子串
+
+数组Array
+数组Array的slice()方法与字符串的substring()方法相似
+方法：
+indexOf
+slice 返回子串
+push 末尾添加
+pop 最后一个元素删掉
+unshift 头部添加
+shift 第一个元素删掉
+sort 排序（可自定义顺序排序，后续）
+reverse 反转
+splice 指定索引开始删除，并从该位置添加若干元素
+concat 连接数组(返回一个新的数组)
+join 每个元素用指定的字符串连接
+多维数组
+
+对象
+var test = {
+	name:'xxx',
+	'middle-school':'No.1'
+}
+
+访问：
+test.name 或　test['name']
+test['middle-school'] -- 不能用test.middle-school, 该属性不是有效的变量名．属性名包含特殊字符时必须用＂括起来，所有尽量用标准的变量名．
+
+访问不存在的属性：undefined
+检测属性：in
+'name' in test; //true
+'toString' in test; //true 因为toString是对象原型的属性
+
+检测对象自身拥有的属性：hasOwnProperty
+test.hasOwnProperty('name'); //true
+test.hasOwnProperty('toString'); //false
+
+循环for ... in: 循环对象的所有属性
+var o = {
+    name: 'Jack',
+    age: 20,
+    city: 'Beijing'
+};
+for (var key in o) {
+    if (o.hasOwnProperty(key)) {
+        alert(key); // 'name', 'age', 'city'
+    }
+}
+
+Array也是对象，可用于Array.
+
+Map和Set
+ES6规范引入的Map和Set.
+解决对象属性只能是字符串的问题
+
+Map:
+var m = new Map([['Michael', 95], ['Bob', 75], ['Tracy', 85]]);
+m.get('Michael'); // 95
+或者
+var m = new Map(); // 空Map
+m.set('Adam', 67); // 添加新的key-value
+m.set('Bob', 59);
+m.has('Adam'); // 是否存在key 'Adam': true
+m.get('Adam'); // 67
+m.delete('Adam'); // 删除key 'Adam'
+m.get('Adam'); // undefined
+
+Set和Map类似，但不存储value.
+var s = new Set([1, 2, 3, 3, '3']);
+s; // Set {1, 2, 3, "3"}
+
+var s1 = new Set(); // 空Set
+s1.add(4);
+s1.delete(4);
+
+iterable
+ES6中引入为了统一集合类型　Array Map Set都属于iterable
+iterable类型的集合可通过for...of来遍历
+var a = ['A', 'B', 'C'];
+var s = new Set(['A', 'B', 'C']);
+var m = new Map([[1, 'x'], [2, 'y'], [3, 'z']]);
+for (var x of a) { // 遍历Array
+    alert(x);
+}
+for (var x of s) { // 遍历Set
+    alert(x);
+}
+for (var x of m) { // 遍历Map
+    alert(x[0] + '=' + x[1]);
+}
+
+与for...in的区别：
+for...in有历史遗留问题，Array数组实际上也是对象，以下操作时导致遍历对象的属性，但array的length属性却不包括在内，还是3：
+var a = ['A', 'B', 'C'];
+a.name = 'Hello';
+for (var x in a) {
+    alert(x); // '0', '1', '2', 'name'
+}
+
+用for...of只循环集合本身的元素：
+var a = ['A', 'B', 'C'];
+a.name = 'Hello';
+for (var x of a) {
+    alert(x); // 'A', 'B', 'C'
+}
+
+更好的方式是使用iterable内置的forEach,接收函数，每次迭代的时候回调：
+var a = ['A', 'B', 'C'];
+a.forEach(function (element, index, array) {
+    // element: 指向当前元素的值
+    // index: 指向当前索引
+    // array: 指向Array对象本身
+    alert(element);
+});
+
+重点：注意这里function的用法，参数是个数是可变的，参数名字也可以随意取．但是顺序参数代表的含义（这里是Array）是已经定义的，就是说第一个参数是指向当前元素的值，第二个是指向当前索引，第三个是指向Array对象本身．
+js中很多这种类似的用法，回调的时候使用．
+
+Set没有索引，因此回调函数前两个参数都是元素本身：
+var s = new Set(['A', 'B', 'C']);
+s.forEach(function (element, sameElement, set) {
+    alert(element);
+});
+
+Map的参数依次为value,key和map本身：
+var m = new Map([[1, 'x'], [2, 'y'], [3, 'z']]);
+m.forEach(function (value, key, map) {
+    alert(value);
+});
+
+参数个数可变，可省略，比如只需要element:
+var a = ['A', 'B', 'C'];
+a.forEach(function (element) {
+    alert(element);
+});
+
+函数，可对参数检查typeof：
+function abs(x) {
+    if (typeof x !== 'number') {
+        throw 'Not a number';
+    }
+    if (x >= 0) {
+        return x;
+    } else {
+        return -x;
+    }
+}
+
+arguments是保存传入的所有参数（类似Array但不是Array？怎么理解？）
+function foo(x) {
+    alert(x); // 10
+    for (var i=0; i<arguments.length; i++) {
+        alert(arguments[i]); // 10, 20, 30
+    }
+}
+foo(10, 20, 30);
+
+// foo(a[, b], c)
+// 接收2~3个参数，b是可选参数，如果只传2个参数，b默认为null：
+function foo(a, b, c) {
+    if (arguments.length === 2) {
+        // 实际拿到的参数是a和b，c为undefined
+        c = b; // 把b赋给c
+        b = null; // b变为默认值
+    }
+    // ...
+}
+
+rest参数：
+使用arguments获取除已定义参数之外的参数时，用法：
+//使用Array保存
+function foo(a, b) {
+    var i, rest = [];
+    if (arguments.length > 2) {
+        for (i = 2; i<arguments.length; i++) {
+            rest.push(arguments[i]);
+        }
+    }
+    console.log('a = ' + a);
+    console.log('b = ' + b);
+    console.log(rest);
+}
+
+ES6标准引入了rest参数，上面写法可改写为：
+function foo(a, b, ...rest) {
+    console.log('a = ' + a);
+    console.log('b = ' + b);
+    console.log(rest);
+}
+
+foo(1, 2, 3, 4, 5);
+// 结果:
+// a = 1
+// b = 2
+// Array [ 3, 4, 5 ]
+
+foo(1);
+// 结果:
+// a = 1
+// b = undefined
+// Array []　注意：不是undefined,而是空数组
+
+
+全局作用域：
+与window.xxx 是一样的，这里xxx也可以是函数
+alert也就是window.alert
+
+名字空间：
+减少不同js文件中使用了相同全局变量，把自己的所有变量和函数全部绑定到一个全局变量中。
+// 唯一的全局变量MYAPP:
+var MYAPP = {};
+
+// 其他变量:
+MYAPP.name = 'myapp';
+MYAPP.version = 1.0;
+
+// 其他函数:
+MYAPP.foo = function () {
+    return 'foo';
+};
+
+比如jQuery库的用法就用了名字空间，后续分析．
+
+局部作用域,let的用法：
+注意：js的变量作用域是函数内部，所以：
+function foo() {
+    for (var i=0; i<100; i++) {
+        //
+    }
+    i += 100; // 仍然可以引用变量i
+}
+
+需要改为let(ES6引入)，块级作用域:
+function foo() {
+    for (var i=0; i<100; i++) {
+        //
+    }
+    i += 100; // SyntaxError
+}
+
+常量const(ES6引入)
+ES6之前申明常量，和申明变量一样，只是按约定变量名大写，事实上不是常量，可以修改．
+ES6引入const,不可修改．
+注意：const与let都具有块级作用域！
+
+解构赋值（ES6引入）
+ES6之前：
+var array = ['hello', 'JavaScript', 'ES6'];
+var x = array[0];
+var y = array[1];
+var z = array[2];
+
+使用解构赋值：
+// 如果浏览器支持解构赋值就不会报错:
+var [x, y, z] = ['hello', 'JavaScript', 'ES6'];
+
+嵌套：
+let [x, [y, z]] = ['hello', ['JavaScript', 'ES6']];
+
+忽略：
+let [, , z] = ['hello', 'JavaScript', 'ES6']; // 忽略前两个元素，只对z赋值第三个元素
+
+对象属性：
+var person = {
+    name: '小明',
+    age: 20,
+    gender: 'male',
+    passport: 'G-12345678',
+    school: 'No.4 middle school'
+};
+var {name, age, passport} = person;
+
+对象属性嵌套：
+var person = {
+    name: '小明',
+    age: 20,
+    gender: 'male',
+    passport: 'G-12345678',
+    school: 'No.4 middle school',
+    address: {
+        city: 'Beijing',
+        street: 'No.1 Road',
+        zipcode: '100001'
+    }
+};
+var {name, address: {city, zipcode}} = person;
+
+如果要使用的变量名和属性名不一致:
+// 把passport属性赋值给变量id:
+let {name, passort:id} = person;
+
+使用默认值：
+// 如果person对象没有single属性，默认赋值为true:
+var {name, single=true} = person;
+
+方法
+对象绑定方法：
+var xiaoming = {
+    name: '小明',
+    birth: 1990,
+    age: function () {
+        var y = new Date().getFullYear();
+        return y - this.birth;　//注意：this指向当前对象
+    }
+};
+
+xiaoming.age; // function xiaoming.age()
+xiaoming.age(); // 今年调用是25,明年调用就变成26了
+
+如果是单独调用函数，this指向window:
+var fn = xiaoming.age; // 先拿到xiaoming的age函数
+fn(); // NaN
+
+或者写成：
+function getAge() {
+    var y = new Date().getFullYear();
+    return y - this.birth;
+}
+
+var xiaoming = {
+    name: '小明',
+    birth: 1990,
+    age: getAge
+};
+
+xiaoming.age(); // 25, 正常结果
+getAge(); // NaN　
+
+在strict模式下，会让this(非strict模式下指向window)指向undefined:
+var fn = xiaoming.age;
+fn(); // Uncaught TypeError: Cannot read property 'birth' of undefined
+
+函数内再定义函数，this指向undefined(非strict模式下指向window):
+'use strict';
+
+var xiaoming = {
+    name: '小明',
+    birth: 1990,
+    age: function () {
+        function getAgeFromBirth() {
+            var y = new Date().getFullYear();
+            return y - this.birth;
+        }
+        return getAgeFromBirth();
+    }
+};
+
+xiaoming.age(); // Uncaught TypeError: Cannot read property 'birth' of undefined
+
+修复上面的问题，使用that(定义的变量即可)捕获this：
+'use strict';
+
+var xiaoming = {
+    name: '小明',
+    birth: 1990,
+    age: function () {
+        var that = this; // 在方法内部一开始就捕获this
+        function getAgeFromBirth() {
+            var y = new Date().getFullYear();
+            return y - that.birth; // 用that而不是this
+        }
+        return getAgeFromBirth();
+    }
+};
+
+xiaoming.age(); // 25
+
+apply绑定this,两个参数，第一个为this绑定的对象，第二个是Array表示函数本身的参数:
+function getAge() {
+    var y = new Date().getFullYear();
+    return y - this.birth;
+}
+
+var xiaoming = {
+    name: '小明',
+    birth: 1990,
+    age: getAge
+};
+
+xiaoming.age(); // 25
+getAge.apply(xiaoming, []); // 25, this指向xiaoming, 参数为空
+
+call和apply类似，区别在于call把参数按顺序传入，不用array:
+(普通函数，把this绑定为null)
+Math.max.apply(null, [3, 5, 4]); // 5
+Math.max.call(null, 3, 5, 4); // 5
+
+注意：使用箭头函数时自动修复this作用域问题，看后面的分析．
+
+装饰器
+使用apply动态改变函数行为，改为默认的parseInt():
+var count = 0;
+var oldParseInt = parseInt; // 保存原函数
+
+window.parseInt = function () {
+    count += 1;
+    return oldParseInt.apply(null, arguments); // 调用原函数
+};
+
+// 测试:
+parseInt('10');
+parseInt('20');
+parseInt('30');
+count; // 3
+
+高阶函数：即参数接收另一个函数
+function add(x, y, f) {
+    return f(x) + f(y);
+}
+
+调用：
+add(-5, 6, Math.abs);//11
+
+map/reduce
+map()方法定义在Array中，传入参数为函数对象本身，函数作用在Array的每一个元素并把结果生成一个新的Array：
+function pow(x) {
+    return x * x;
+}
+
+var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+arr.map(pow); // [1, 4, 9, 16, 25, 36, 49, 64, 81]
+
+转字符串：
+var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+arr.map(String); // ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+reduce()方法也定义在Array中，传入的函数必须有两个参数，结果继续和下一个元素做累积运算：
+[x1, x2, x3, x4].reduce(f) = f(f(f(x1, x2), x3), x4)
+求和：
+var arr = [1, 3, 5, 7, 9];
+arr.reduce(function (x, y) {
+    return x + y;
+}); // 25
+
+变成整数：
+var arr = [1, 3, 5, 7, 9];
+arr.reduce(function (x, y) {
+    return x * 10 + y;
+}); // 13579
+
+filter
+filter()方法也定义在Array中，把传入的函数依次作用于每个元素，根据返回值是true还是false决定保留还是丢弃该元素，实现过滤的作用．
+过滤偶数：
+var arr = [1, 2, 4, 5, 6, 9, 10, 15];
+var r = arr.filter(function (x) {
+    return x % 2 !== 0;
+});
+r; // [1, 5, 9, 15]
+
+删除空字符串：
+var arr = ['A', '', 'B', null, undefined, 'C', '  '];
+var r = arr.filter(function (s) {
+    return s && s.trim(); // 注意：IE9以下的版本没有trim()方法
+});
+r; // ['A', 'B', 'C']
+
+和forEach(）类似，filter()接收的函数有三个参数：
+var arr = ['A', 'B', 'C'];
+var r = arr.filter(function (element, index, self) {
+    console.log(element); // 依次打印'A', 'B', 'C'
+    console.log(index); // 依次打印0, 1, 2
+    console.log(self); // self就是变量arr
+    return true;
+});
+
+去除Array的重复元素：
+var
+    r,
+    arr = ['apple', 'strawberry', 'banana', 'pear', 'apple', 'orange', 'orange', 'strawberry'];
+
+//self.indexOf(element)只会返回相同元素的第一个索引值
+r = arr.filter(function (element, index, self) {
+    return self.indexOf(element) === index;
+});
+
+sort
+排序，Array的sort()方法默认把所有元素先转换为String再排序，所以：
+[10, 20, 1, 2].sort(); // [1, 10, 2, 20]
+
+按数字大小排序：
+var arr = [10, 20, 1, 2];
+arr.sort(function (x, y) {
+    if (x < y) {
+        return -1;
+    }
+    if (x > y) {
+        return 1;
+    }
+    return 0;
+}); // [1, 2, 10, 20]
+
+倒序排序：
+var arr = [10, 20, 1, 2];
+arr.sort(function (x, y) {
+    if (x < y) {
+        return 1;
+    }
+    if (x > y) {
+        return -1;
+    }
+    return 0;
+}); // [20, 10, 2, 1]
+
+忽略大小写比较（都转为大写或者都转为小写）：
+var arr = ['Google', 'apple', 'Microsoft'];
+arr.sort(function (s1, s2) {
+    x1 = s1.toUpperCase();
+    x2 = s2.toUpperCase();
+    if (x1 < x2) {
+        return -1;
+    }
+    if (x1 > x2) {
+        return 1;
+    }
+    return 0;
+}); // ['apple', 'Google', 'Microsoft']
+
+重要：闭包
+函数作为返回值，即不返回结果而是返回函数，需要计算结果的时候再调用：
+function lazy_sum(arr) {
+    var sum = function () {
+        return arr.reduce(function (x, y) {
+            return x + y;
+        });
+    }
+    return sum;
+}
+
+var f = lazy_sum([1, 2, 3, 4, 5]); // function sum()
+
+//真正计算结果
+f();
+
+注意：上面例子中内部函数可以引用外部函数的参数和局部变量，返回内部函数时，相关参数和变量都保存在返回的函数中，这就是闭包．
+
+//每次调用都会返回一个新的函数
+var f1 = lazy_sum([1, 2, 3, 4, 5]);
+var f2 = lazy_sum([1, 2, 3, 4, 5]);
+f1 === f2; // false
+
+返回函数引用循环变量出现的问题：
+function count() {
+    var arr = [];
+    for (var i=1; i<=3; i++) {
+        arr.push(function () {//返回函数作为arr的元素
+            return i * i;
+        });
+    }
+    return arr;
+}
+
+var results = count();
+var f1 = results[0];
+var f2 = results[1];
+var f3 = results[2];
+f1(); // 16
+f2(); // 16
+f3(); // 16
+
+结果为16,是因为使用时引用的变量i变成了4.
+所以，重点：返回函数不要引用任何循环变量，或者后续会发生变化的变量。
+
+如果要引用循环变量，怎么更改：
+1. 创建匿名函数并立刻执行的语法：
+(function(x){
+	return x * x;
+})(3);//9
+
+2.创建函数，参数绑定循环变量当前的值改写：
+function count() {
+    var arr = [];
+    for (var i=1; i<=3; i++) {
+        arr.push((function (n) {
+            return function () {
+                return n * n;
+            }
+        })(i));
+    }
+    return arr;
+}
+
+var results = count();
+var f1 = results[0];
+var f2 = results[1];
+var f3 = results[2];
+
+f1(); // 1
+f2(); // 4
+f3(); // 9
+
+以上闭包实现了返回一个函数并延迟执行的作用．
+还可以使用闭包封装私有变量(x)，状态对外隐藏，相当与java的private：
+'use strict';
+
+function create_counter(initial) {
+    var x = initial || 0;
+    return {
+        inc: function () {
+            x += 1;
+            return x;
+        }
+    }
+}
+
+var c1 = create_counter();
+c1.inc(); // 1
+c1.inc(); // 2
+c1.inc(); // 3
+
+var c2 = create_counter(10);
+c2.inc(); // 11
+c2.inc(); // 12
+c2.inc(); // 13
+
+闭包还可以把多参数函数变成单参数函数：
+function make_pow(n) {
+    return function (x) {
+        return Math.pow(x, n);
+    }
+}
+
+// 创建两个新函数:
+var pow2 = make_pow(2);
+var pow3 = make_pow(3);
+
+pow2(5); // 25
+pow3(7); // 343
+
+箭头函数
+ES6标识新增Arrow Function
+x => x * x
+相当于
+function(x){
+	return x * x;
+}
+
+// 两个参数:
+(x, y) => x * x + y * y
+
+// 无参数:
+() => 3.14
+
+// 可变参数:
+(x, y, ...rest) => {
+    var i, sum = x + y;
+    for (i=0; i<rest.length; i++) {
+        sum += rest[i];
+    }
+    return sum;
+}
+
+返回对象的单表达式：
+// SyntaxError:　返回对象和函数体的{...}语法冲突，错误．
+x => { foo: x }
+
+// ok:
+x => ({ foo: x })
+
+x => {
+	return {foo:x};
+}
+
+使用this时，箭头函数修复了this绑定的问题：
+问题重现：
+var obj = {
+    birth: 1990,
+    getAge: function () {
+        var b = this.birth; // 1990
+        var fn = function () {
+            return new Date().getFullYear() - this.birth; // this指向window或undefined
+        };
+        return fn();
+    }
+};
+
+之前的修复方法是使用var that = this先捕获this;或者显示apply,call绑定对象．
+使用箭头函数不需要：
+var obj = {
+    birth: 1990,
+    getAge: function () {
+        var b = this.birth; // 1990
+        var fn = () => new Date().getFullYear() - this.birth; // this指向obj对象
+        return fn();
+    }
+};
+obj.getAge(); // 25
+
+无法对this进行绑定，第一个参数被忽略：
+var obj = {
+    birth: 1990,
+    getAge: function (year) {
+        var b = this.birth; // 1990
+        var fn = (y) => y - this.birth; // this.birth仍是1990
+        return fn.call({birth:2000}, year);
+    }
+};
+obj.getAge(2015); // 25
+
+generator（借鉴的python的generator）
+生成器，ES6标准引入的新的数据类型．
+由function* 定义．
+用yield返回多次．
+
+function* foo(x) {
+    yield x + 1;
+    yield x + 2;
+    return x + 3;
+}
+
+var fun = foo(5);
+
+next()方法：
+fun.next();//{value:6,done:false}
+fun.next();//{value:7,done:false}
+fun.next();//{value:8,done:false}
+
+使用for...of迭代：
+for(var x of fun){
+	console.log(x);//依次输出6,7,8
+}
+
+标准对象：
+typeof 123; // 'number'
+typeof NaN; // 'number'
+typeof 'str'; // 'string'
+typeof true; // 'boolean'
+typeof undefined; // 'undefined'
+typeof Math.abs; // 'function'
+typeof null; // 'object'
+typeof []; // 'object'
+typeof {}; // 'object'
+
+number、string、boolean、function和undefined有别于其他类型。
+其他都是object类型．
+
+包装对象：
+var n = new Number(123); // 123,生成了新的包装类型
+var b = new Boolean(true); // true,生成了新的包装类型
+var s = new String('str'); // 'str',生成了新的包装类型
+包装对象的类型是object
+如果没写new:
+var n = Number('123'); // 123，相当于parseInt()或parseFloat()
+typeof n; // 'number'
+
+var b = Boolean('true'); // true
+typeof b; // 'boolean'
+
+var b2 = Boolean('false'); // true! 'false'字符串转换结果为true！因为它是非空字符串！
+var b3 = Boolean(''); // false
+
+var s = String(123.45); // '123.45'
+typeof s; // 'string'
+
+numder调用toString()时：
+123.toString(); // SyntaxError　因为．会被认为是小数点
+
+改为：
+123..toString(); // '123', 注意是两个点！
+(123).toString(); // '123'
+
+Date
+获取系统当前时间：
+var now = new Date();
+now; // Wed Jun 24 2015 19:49:22 GMT+0800 (CST)
+now.getFullYear(); // 2015, 年份
+now.getMonth(); // 5, 月份，注意月份范围是0~11，5表示六月
+now.getDate(); // 24, 表示24号
+now.getDay(); // 3, 表示星期三
+now.getHours(); // 19, 24小时制
+now.getMinutes(); // 49, 分钟
+now.getSeconds(); // 22, 秒
+now.getMilliseconds(); // 875, 毫秒数
+now.getTime(); // 1435146562875, 以number形式表示的时间戳
+
+创建一个指定日期和时间的Date对象：
+var d = new Date(2015, 5, 19, 20, 15, 30, 123);
+d; // Fri Jun 19 2015 20:15:30 GMT+0800 (CST)
+
+创建一个指定日期和时间的方法是解析一个符合ISO 8601格式的字符串：
+var d = Date.parse('2015-06-24T19:49:22.875+08:00');
+d; // 1435146562875
+
+返回的d是时间戳，时间戳转换为Date:
+var d = new Date(1435146562875);
+d; // Wed Jun 24 2015 19:49:22 GMT+0800 (CST)
+
+d.toLocaleString(); // '2015/6/24 下午7:49:22'，本地时间（北京时区+8:00），显示的字符串与操作系统设定的格式有关
+d.toUTCString(); // 'Wed, 24 Jun 2015 11:49:22 GMT'，UTC时间，与本地时间相差8小时
+
+获取当前时间戳：
+if (Date.now) {
+    alert(Date.now()); // 老版本IE没有now()方法
+} else {
+    alert(new Date().getTime());
+}
+
+UTC时间
+通用协调时(UTC, Universal Time Coordinated)。UTC与格林尼治平均时(GMT, Greenwich Mean Time)一样，都与英国伦敦的本地时相同。
+
+
+正则表达式：
+匹配：
+\d 数字
+\w 字母
+\s 空格(或Tab等空白符)
+. 任意字符(一个)
+* 任意个字符(包括0个)
++ 至少一个字符(\d+至少一个数字)
+? 0或1个字符
+{n} n个字符 (\d{n}匹配n个数字)
+{n,m} n-m个字符(\d{n,m}匹配n-m个数字)
+^　行开始^\d必须以数字开头
+$  行结束\d$必须以数字结束
+A|B A或B
+
+举例：\d{3}\s+\d{3,8} 匹配 
+\d{3} 3个数字
+\s+ 只少一个空白符
+\d{3,8}　3-8个数字
+
+区号隔开的电话号码：021 8888
+
+\d{3}\-\d{3,8} -要转义用\- 021-8888
+
+写法：
+var re1 = /\d{3}\-\d{3,8}/; 需要用/.../的形式
+var re2 = new RegExp(/\d{3}\-\d{3,8}/);
+var re3 = new RegExp('\\d{3}\\-\\d{3,8}');字符串中\都需要转义成\\
+
+[0-9a-zA-Z\_]可以匹配一个数字、字母或者下划线；
+
+[0-9a-zA-Z\_]+可以匹配至少由一个数字、字母或者下划线组成的字符串，比如'a100'，'0_Z'，'js2015'等等；
+
+[a-zA-Z\_\$][0-9a-zA-Z\_\$]*可以匹配由字母或下划线、$开头，后接任意个由一个数字、字母或者下划线、$组成的字符串，也就是JavaScript允许的变量名；
+
+[a-zA-Z\_\$][0-9a-zA-Z\_\$]{0, 19}更精确地限制了变量的长度是1-20个字符（前面1个字符+后面最多19个字符）。
+
+切分字符串：
+'a b   c'.split(/\s+/); // ['a', 'b', 'c'] //连续空格识别
+'a,b;; c  d'.split(/[\s\,\;]+/); // ['a', 'b', 'c', 'd']//空格或,或;识别
+
+分组:()
+提取分组：exec()
+
+var re = /^(\d{3})-(\d{3,8})$/;
+re.exec('010-12345'); // ['010-12345', '010', '12345'],返回的是Array
+
+对时间的匹配：
+var re = /^(0[0-9]|1[0-9]|2[0-3]|[0-9])\:(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]|[0-9])\:(0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]|[0-9])$/;
+re.exec('19:05:30'); // ['19:05:30', '19', '05', '30']
+
+贪婪匹配
+默认为贪婪匹配，0*匹配的是空字符串：
+var re = /^(\d+)(0*)$/;
+re.exec('102300'); // ['102300', '102300', '']
+改为非贪婪（加个?,原理是啥？）：
+var re = /^(\d+?)(0*)$/;
+re.exec('102300'); // ['102300', '1023', '00']
+
+全局搜索：g 每次运行exec()，正则表达式本身会更新lastIndex属性，表示上次匹配到的最后索引:
+var s = 'JavaScript, VBScript, JScript and ECMAScript';
+var re=/[a-zA-Z]+Script/g;
+
+// 使用全局匹配:
+re.exec(s); // ['JavaScript']
+re.lastIndex; // 10
+
+re.exec(s); // ['VBScript']
+re.lastIndex; // 20
+
+re.exec(s); // ['JScript']
+re.lastIndex; // 29
+
+re.exec(s); // ['ECMAScript']
+re.lastIndex; // 44
+
+re.exec(s); // null，直到结束仍没有匹配到
+
+再举例：
+//g代表全局搜索，以字符串的replace()为例
+var s = '1234324-ffwfwef-mmmmj-end';
+var regS = /\-/;
+console.log(s.replace(regS,'+'));//1234324+ffwfwef-mmmmj-end
+
+
+var regs2 = /\-/g;//全局搜索替换
+console.log(s.replace(regs2,'+'));//1234324+ffwfwef+mmmmj+end
+
+JSON
+JavaScript Object Notation的缩写，它是一种数据交换格式。
+JSON的数据类型：
+number：和JavaScript的number完全一致；
+boolean：就是JavaScript的true或false；
+string：就是JavaScript的string；
+null：就是JavaScript的null；
+array：就是JavaScript的Array表示方式——[]；
+object：就是JavaScript的{ ... }表示方式。
+
+序列化：将对象序列化成JSON格式字符串
+
+var xiaoming = {
+    name: '小明',
+    age: 14,
+    gender: true,
+    height: 1.65,
+    grade: null,
+    'middle-school': '\"W3C\" Middle School',
+    skills: ['JavaScript', 'Java', 'Python', 'Lisp']
+};
+
+JSON.stringify(xiaoming); // '{"name":"小明","age":14,"gender":true,"height":1.65,"grade":null,"middle-school":"\"W3C\" Middle School","skills":["JavaScript","Java","Python","Lisp"]}'
+
+输出的控制：
+JSON.stringify(xiaoming, null, '  ');
+
+结果：
+{
+  "name": "小明",
+  "age": 14,
+  "gender": true,
+  "height": 1.65,
+  "grade": null,
+  "middle-school": "\"W3C\" Middle School",
+  "skills": [
+    "JavaScript",
+    "Java",
+    "Python",
+    "Lisp"
+  ]
+}
+
+第三个参数''里面是空格，键值对按下面格式输出．如果第三个参数中间为空，则输出就是连续格式，如果第三个参数这样'11'，那么输出如下：
+{
+11"name": "小明",
+11"age": 14,
+11"gender": true,
+11"height": 1.65,
+11"grade": null,
+11"middle-school": "\"W3C\" Middle School",
+11"skills": [
+1111"JavaScript",
+1111"Java",
+1111"Python",
+1111"Lisp"
+11]
+}
+
+所以，第三个参数一般固定为' '
+
+第二个参数用于控制如何筛选对象的键值，比如只输出指定的属性，传入Array：
+JSON.stringify(xiaoming, ['name', 'skills'], '  ');
+
+结果：
+{
+  "name": "小明",
+  "skills": [
+    "JavaScript",
+    "Java",
+    "Python",
+    "Lisp"
+  ]
+}
+
+第二个参数可以是函数，对键值对进行处理．
+function convert(key, value) {
+    if (typeof value === 'string') {
+        return value.toUpperCase();
+    }
+    return value;
+}
+
+JSON.stringify(xiaoming, convert, '  ');
+string的属性值变成大写
+
+给对象定义toJSON()方法：
+var xiaoming = {
+    name: '小明',
+    age: 14,
+    gender: true,
+    height: 1.65,
+    grade: null,
+    'middle-school': '\"W3C\" Middle School',
+    skills: ['JavaScript', 'Java', 'Python', 'Lisp'],
+    toJSON: function () {
+        return { // 只输出name和age，并且改变了key：
+            'Name': this.name,
+            'Age': this.age
+        };
+    }
+};
+
+JSON.stringify(xiaoming); // '{"Name":"小明","Age":14}'
+
+反序列化
+用JSON.parse()将JSON格式的字符串变成一个javascript对象：
+JSON.parse('[1,2,3,true]'); // [1, 2, 3, true]
+JSON.parse('{"name":"小明","age":14}'); // Object {name: '小明', age: 14}
+JSON.parse('true'); // true
+JSON.parse('123.45'); // 123.45
+
+JSON.parse()还可以接收一个函数，用来转换解析出的属性：
+
+JSON.parse('{"name":"小明","age":14}', function (key, value) {
+    // 把number * 2:
+    if (key === 'name') {
+        return value + '同学';
+    }
+    return value;
+}); // Object {name: '小明同学', age: 14}
+
+面向对象编程：
+js不区分类和实例的概念，而是通过原型
+var Student = {
+    name: 'Robot',
+    height: 1.2,
+    run: function () {
+        console.log(this.name + ' is running...');
+    }
+};
+
+var xiaoming = {
+    name: '小明'
+};
+
+xiaoming.__proto__ = Student;　//prototype:原型
+
+xiaoming的原型指向Student,类似继承了：
+xiaoming.name; // '小明'
+xiaoming.run(); // 小明 is running...
+
+实际使用时不要用__proto__来改变对象的原型
+创建原型继承的方法一，用函数来实现（Object.create()创建）：
+// 原型对象:
+var Student = {
+    name: 'Robot',
+    height: 1.2,
+    run: function () {
+        console.log(this.name + ' is running...');
+    }
+};
+
+function createStudent(name) {
+    // 基于Student原型创建一个新对象:
+    var s = Object.create(Student);
+    // 初始化新对象:
+    s.name = name;
+    return s;
+}
+
+var xiaoming = createStudent('小明');
+xiaoming.run(); // 小明 is running...
+xiaoming.__proto__ === Student; // true
+
+原型链
+Array的原型链：
+var arr = [1, 2, 3];
+原型链：arr ----> Array.prototype ----> Object.prototype ----> null
+Array.prototype定义了indexOf()、shift()等方法，因此你可以在所有的Array对象上直接调用这些方法。
+
+function的原型链：
+function foo() {
+    return 0;
+}
+原型链：foo ----> Function.prototype ----> Object.prototype ----> null
+Function.prototype定义了apply()等方法，因此，所有函数都可以调用apply()方法。
+
+obj.xxx访问属性时,JavaScript引擎先在当前对象上查找该属性，如果没有找到，就到其原型对象上找...一直到Object.prototype,如果还是没有，返回undefined.
+所以，为了性能，原型链不要太长．
+
+构造函数
+function Student(name) {
+    this.name = name;
+    this.hello = function () {
+        alert('Hello, ' + this.name + '!');
+    }
+}
+
+var xiaoming = new Student('小明');
+xiaoming.name; // '小明'
+xiaoming.hello(); // Hello, 小明!
+
+注意：构造函数绑定的this指向新创建的对象，并默认返回this.
+如果不写new,就是一个普通函数，返回undefined.
+
+原型链：xiaoming ----> Student.prototype ----> Object.prototype ----> null
+
+以上写法有个问题，如果创建多个对象，比如再创建xiaohong:
+xiaoming.name; // '小明'
+xiaohong.name; // '小红'
+xiaoming.hello; // function: Student.hello()
+xiaohong.hello; // function: Student.hello()
+xiaoming.hello === xiaohong.hello; // false
+
+各自的hello()是两个不同的函数．以下写法共享函数，节省内存：
+function Student(name) {
+    this.name = name;
+}
+
+Student.prototype.hello = function () {
+    alert('Hello, ' + this.name + '!');
+};
+
+如果忘记写new:
+strict模式下，this.name = name会报错，因为this绑定undefined
+非strict模式下，不报错，this绑定为window,导致创建全局变量name并返回undefined.
+
+所以，约定，构造函数首字母大写，以区别普通函数．
+
+new Student()创建的对象还从原型上获得了一个constructor属性，它指向函数Student本身：
+console.log(Student.prototype.constructor === Student); //true
+console.log(xiaoming.construction === Student.prototype.construction); //true
+console.log(xiaoming.construction === Student); //false ???为什么
+console.log(Object.getPrototypeOf(xiaoming) === Student.prototype); //true
+console.log(xiaoming instanceof Student); //true
+// xiaoming instanceof Student.prototype; //TypeError: Right-hand side of 'instanceof' is not callable
+
+封装new操作：
+function Student(props) {
+    this.name = props.name || '匿名'; // 默认值为'匿名'
+    this.grade = props.grade || 1; // 默认值为1
+}
+
+Student.prototype.hello = function () {
+    alert('Hello, ' + this.name + '!');
+};
+
+function createStudent(props) {
+    return new Student(props || {})
+}
+
+//用Object作为参数，传递需要的属性即可，还可以从JSON对象直接创建
+var xiaoming = createStudent({　
+    name: '小明'
+});
+
+xiaoming.grade; // 1
+
+原型继承：实现属性与功能扩展
+基于Student扩展出PrimaryStudent:
+function PrimaryStudent(props) {
+    // 调用Student构造函数，绑定this变量:
+    Student.call(this, props);
+    this.grade = props.grade || 1;
+}
+
+只是调用了Student的构造函数并不是继承Student,原型链：
+new PrimaryStudent() ----> PrimaryStudent.prototype ----> Object.prototype ----> null
+
+如果要实现继承，原型链要实现如下：
+new PrimaryStudent() ----> PrimaryStudent.prototype ----> Student.prototype ----> Object.prototype ----> null
+
+即要实现原型继承：PrimaryStudent.prototype ----> Student.prototype
+
+使用中间对象(空函数)来实现：
+// PrimaryStudent构造函数:
+function PrimaryStudent(props) {
+    Student.call(this, props);
+    this.grade = props.grade || 1;
+}
+
+// 空函数F:
+function F() {
+}
+
+// 把F的原型指向Student.prototype:
+F.prototype = Student.prototype;
+
+// 把PrimaryStudent的原型指向一个新的F对象，F对象的原型正好指向Student.prototype:
+PrimaryStudent.prototype = new F();
+
+// 把PrimaryStudent原型的构造函数修复为PrimaryStudent:
+PrimaryStudent.prototype.constructor = PrimaryStudent;
+
+// 继续在PrimaryStudent原型（就是new F()对象）上定义方法：
+PrimaryStudent.prototype.getGrade = function () {
+    return this.grade;
+};
+
+// 创建xiaoming:
+var xiaoming = new PrimaryStudent({
+    name: '小明',
+    grade: 2
+});
+xiaoming.name; // '小明'
+xiaoming.grade; // 2
+
+// 验证原型:
+xiaoming.__proto__ === PrimaryStudent.prototype; // true
+xiaoming.__proto__.__proto__ === Student.prototype; // true
+
+// 验证继承关系:
+xiaoming instanceof PrimaryStudent; // true
+xiaoming instanceof Student; // true
+
+神奇，原理就是：
+F.prototype = Student.prototype;
+PrimaryStudent.prototype = new F();//js一切皆对象
+
+实现了原型继承，不过还需要修改构造函数(这样才能使用构造函数创建对象)：
+PrimaryStudent.prototype.constructor = PrimaryStudent;
+
+将F的定义封装起来：
+function inherits(Child, Parent) {
+    var F = function () {};
+    F.prototype = Parent.prototype;
+    Child.prototype = new F();
+    Child.prototype.constructor = Child;
+}
+
+function Student(props) {
+    this.name = props.name || 'Unnamed';
+}
+
+Student.prototype.hello = function () {
+    alert('Hello, ' + this.name + '!');
+}
+
+function PrimaryStudent(props) {
+    Student.call(this, props);
+    this.grade = props.grade || 1;
+}
+
+// 实现原型继承链:
+inherits(PrimaryStudent, Student);
+
+// 绑定其他方法到PrimaryStudent原型:
+PrimaryStudent.prototype.getGrade = function () {
+    return this.grade;
+};
+
+JavaScript的原型继承实现方式总结：
+定义新的构造函数，并在内部用call()调用希望“继承”的构造函数，并绑定this；
+借助中间函数F实现原型链继承，最好通过封装的inherits函数完成；
+继续在新的构造函数的原型上定义新方法。
+
+class继承
+ES6开始引入class,实现起来就和java类似了
+class Student {
+    constructor(name) {
+        this.name = name;
+    }
+
+    hello() {　//注意原型对象上的函数写法，没有function关键字
+        alert('Hello, ' + this.name + '!');
+    }
+}
+
+class继承实现：
+class PrimaryStudent extends Student {
+    constructor(name, grade) {
+        super(name); // 记得用super调用父类的构造方法!
+        this.grade = grade;
+    }
+
+    myGrade() {
+        alert('I am at grade ' + this.grade);
+    }
+}
+
+class的引入简化了原型继承的使用，如果要支持ES6以下，可以用Babel工具实现class代码转换为prototype代码．
+
+浏览器与ES6支持
+IE: IE10开始支持ES6
+其他Chrome(早就支持ES6),Safari(OS X 10.7 Lion自带的6.1版本开始支持ES6),FireFox(早就支持ES6)
+
+总结下目前哪些是ES6引入的，避免要兼容IE10以下时踩坑：
+
+
+坑爹的IE
+
+浏览器对象
+window对象不但充当全局作用域，而且表示浏览器窗口.(IE<=8不支持)
+window.innerWidth　浏览器窗口的内部宽度(除去菜单栏、工具栏、边框等占位元素后，用于显示网页的净宽高),在IE<9版本上可以使用document.body.clientWidth;
+window.innerHeight　浏览器窗口的内部高度
+window.outerWidth 浏览器窗口整个宽度
+window.outerHeight　浏览器窗口整个高度
+
+为了兼容，获取宽度可以这样写：
+var width = window.innerWidth || document.body.clientWidth;
+
+navigator
+navigator对象表示浏览器的信息，最常用的属性包括：
+navigator.appName：浏览器名称；
+navigator.appVersion：浏览器版本；
+navigator.language：浏览器设置的语言；
+navigator.platform：操作系统类型；
+navigator.userAgent：浏览器设定的User-Agent字符串。
+
+screen
+screen对象表示屏幕的信息(显示器)，常用的属性有：
+screen.width：屏幕宽度，以像素为单位；
+screen.height：屏幕高度，以像素为单位；
+screen.colorDepth：返回颜色位数，如8、16、24。
+
+location
+location对象表示当前页面的URL信息，当前URL:
+http://www.example.com:8080/path/index.html?a=1&b=2#TOP
+
+location.href;//http://www.example.com:8080/path/index.html?a=1&b=2#TOP
+location.protocol; // 'http'
+location.host; // 'www.example.com'
+location.port; // '8080'
+location.pathname; // '/path/index.html'
+location.search; // '?a=1&b=2'
+location.hash; // 'TOP'
+
+location.assign();//加载一个新页面
+location.reload();//重新加载当前页面
+
+e.g:
+if (confirm('重新加载当前页' + location.href + '?')) {
+    location.reload();
+} else {
+    location.assign('/discuss'); // 设置一个新的URL地址
+}
+
+document
+document对象表示当前页面。由于HTML在浏览器中以DOM形式表示为树形结构，document对象就是整个DOM树的根节点。
+根节点Document自动绑定为全局变量document.
+document.title = '努力学习JavaScript!';//动态改变title
+
+查找DOM树的某个节点，常用根据ID和TagName
+<dl id="drink-menu" style="border:solid 1px #ccc;padding:6px;">
+    <dt>摩卡</dt>
+    <dd>热摩卡咖啡</dd>
+    <dt>酸奶</dt>
+    <dd>北京老酸奶</dd>
+    <dt>果汁</dt>
+    <dd>鲜榨苹果汁</dd>
+</dl>
+
+查找：
+var i, s, menu, drinks;
+
+menu = document.getElementById('drink-menu');
+menu.tagName; // 'DL'
+
+drinks = document.getElementsByTagName('dt');
+s = '提供的饮料有:';
+for (i=0; i<drinks.length; i++) {
+    s = s + drinks[i].innerHTML + ',';
+}
+console.log(s);
+
+输出：
+提供的饮料有:摩卡,酸奶,果汁,
+
+Cookie理解
+当用户登录成功后，服务器会发送Cookie给浏览器，例如user=ABC123XYZ(加密的字符串)...，浏览器保存Cookie后，之后访问该网站时就会在请求头附上该Cookie.
+Cookie还可以存储网站的一些设置，比如显示的语言(下面的prefer=zh)等
+document.cookie; // 'v=123; remember=true; prefer=zh'
+
+默认，HTML页面引入第三方js代码，该第三方js代码可获取到用户的登录信息．
+为了安全，服务器设置Cookie时要使用httpOnly,这样Cookie就不会被js读取．
+
+history
+history对象保存了浏览器的历史记录,JavaScript可以调用history对象的back()或forward ()，相当于用户点击了浏览器的“后退”或“前进”按钮。
+注意：任何情况，你都不应该使用history这个对象了.
+
+对于现代Web页面来说，大量使用AJAX和页面交互．（后续分析？）
+
+操作DOM
+包括：
+更新：更新该DOM节点的内容，相当于更新了该DOM节点表示的HTML的内容；
+遍历：遍历该DOM节点下的子节点
+添加：在该DOM节点下新增一个子节点，相当于动态增加了一个HTML节点；
+删除：将该节点从HTML中删除，相当于删掉了该DOM节点的内容以及它包含的所有子节点。
+
+查找节点常用方法：
+document.getElementById()　ID是唯一的，直接定位唯一的一个节点
+document.getElementsByTagName()
+document.getElementsByClassName()
+
+e.g:
+// 返回ID为'test'的节点：
+var test = document.getElementById('test');
+
+// 先定位ID为'test-table'的节点，再返回其内部所有tr节点：
+var trs = document.getElementById('test-table').getElementsByTagName('tr');
+
+// 先定位ID为'test-div'的节点，再返回其内部所有class包含red的节点：
+var reds = document.getElementById('test-div').getElementsByClassName('red');
+
+// 获取节点test下的所有直属子节点:
+var cs = test.children;
+
+// 获取节点test下第一个、最后一个子节点：
+var first = test.firstElementChild;
+var last = test.lastElementChild;
+
+IE8版本以上还可以使用querySelector()和querySelectorAll()：
+// 通过querySelector获取ID为q1的节点：
+var q1 = document.querySelector('#q1');
+
+// 通过querySelectorAll获取q1节点内的符合条件的所有节点：
+var ps = q1.querySelectorAll('div.highlighted > p');
+
+更新DOM
+1.修改innerHTML属性
+
+// 获取<p id="p-id">...</p>
+var p = document.getElementById('p-id');
+// 设置文本为abc:
+p.innerHTML = 'ABC'; // <p id="p-id">ABC</p>
+// 设置HTML:
+p.innerHTML = 'ABC <span style="color:red">RED</span> XYZ';
+// <p>...</p>的内部结构已修改
+
+注意：写入HTML时，如果写入的字符串是通过网络拿到的，要对字符编码(避免script脚本注入)避免XSS攻击．
+
+XSS攻击：允许恶意web用户将代码植入到提供给其它用户使用的页面中。比如这些代码包括HTML代码和客户端脚本。
+http://www.cnblogs.com/lovesong/p/5199623.html
+有人将XSS攻击分为三种，分别是：
+1. Reflected XSS（基于反射的XSS攻击）
+2. Stored XSS（基于存储的XSS攻击）
+3. DOM-based or local XSS（基于DOM或本地的XSS攻击）
+
+2.修改innderText或textContent属性
+// 获取<p id="p-id">...</p>
+var p = document.getElementById('p-id');
+// 设置文本:
+p.innerText = '<script>alert("Hi")</script>';
+// HTML被自动编码，无法设置一个<script>节点:
+// <p id="p-id">&lt;script&gt;alert("Hi")&lt;/script&gt;</p>
+
+innerText与textContent区别：
+读取属性时，innerText不返回隐藏元素的文本，textContent返回所有文本(IE9以下不支持textContent)．
+
+修改CSS:
+DOM节点的style属性对应所有的CSS，可以直接获取或设置.
+CSS中font-size等，在js中改写为fontSize...
+// 获取<p id="p-id">...</p>
+var p = document.getElementById('p-id');
+// 设置CSS:
+p.style.color = '#ff0000';
+p.style.fontSize = '20px';
+p.style.paddingTop = '2em';
+
+插入DOM
+<!-- HTML结构 -->
+<p id="js">JavaScript</p>
+<div id="list">
+    <p id="java">Java</p>
+    <p id="python">Python</p>
+    <p id="scheme">Scheme</p>
+</div>
+
+var
+    js = document.getElementById('js'),
+    list = document.getElementById('list');
+list.appendChild(js);
+
+"js"节点本来已经存在，上述操作会把节点从原先的位置删除，再插入到新的位置，变为：
+<!-- HTML结构 -->
+<div id="list">
+    <p id="java">Java</p>
+    <p id="python">Python</p>
+    <p id="scheme">Scheme</p>
+    <p id="js">JavaScript</p>
+</div>
+
+如果是从零创建新的节点：
+var
+    list = document.getElementById('list'),
+    haskell = document.createElement('p');　//段落
+haskell.id = 'haskell';
+haskell.innerText = 'Haskell';　//内容
+list.appendChild(haskell);
+
+插入后：
+<!-- HTML结构 -->
+<div id="list">
+    <p id="java">Java</p>
+    <p id="python">Python</p>
+    <p id="scheme">Scheme</p>
+    <p id="haskell">Haskell</p>
+</div>
+
+动态给文档添加CSS定义：
+var d = document.createElement('style');
+d.setAttribute('type', 'text/css');
+d.innerHTML = 'p { color: red }';
+document.getElementsByTagName('head')[0].appendChild(d);
+
+将会在<head>节点末尾插入CSS样式：
+<style type="text/css">p { color: red }</style>
+
+insertBefore
+子节点插入指定位置
+<!-- HTML结构 -->
+<div id="list">
+    <p id="java">Java</p>
+    <p id="python">Python</p>
+    <p id="scheme">Scheme</p>
+</div>
+
+var
+    list = document.getElementById('list'),
+    ref = document.getElementById('python'),
+    haskell = document.createElement('p');
+haskell.id = 'haskell';
+haskell.innerText = 'Haskell';
+list.insertBefore(haskell, ref);
+
+插入"haskell"节点到"python"节点之前：
+<!-- HTML结构 -->
+<div id="list">
+    <p id="java">Java</p>
+    <p id="haskell">Haskell</p>
+    <p id="python">Python</p>
+    <p id="scheme">Scheme</p>
+</div>
+
+循环父节点的所有字节点：
+var
+    i, c,
+    list = document.getElementById('list');
+for (i = 0; i < list.children.length; i++) {
+    c = list.children[i]; // 拿到第i个子节点
+}
+
+删除DOM
+删除DOM节点需要获取该节点本身以及它的父节点，然后调用父节点的removeChild把自己删掉：
+// 拿到待删除节点:
+var self = document.getElementById('to-be-removed');
+// 拿到父节点:
+var parent = self.parentElement;
+// 删除:
+var removed = parent.removeChild(self);
+removed === self; // true
+
+注意：删除后的节点虽然不在文档树中了，但其实它还在内存中，可以随时再次被添加到别的位置。
+
+children属性在节点变化时会实时更新：
+<div id="parent">
+    <p>First</p>
+    <p>Second</p>
+</div>
+
+var parent = document.getElementById('parent');
+parent.removeChild(parent.children[0]);
+parent.removeChild(parent.children[1]); // <-- 浏览器报错
+第一个子节点被删后，子节点数就变成１了，再次删除还是要用parent.children[0]
+
+操作表单
+HTML表单输入控件主要有：
+	文本框，对应的<input type="text">，用于输入文本；
+
+	口令框，对应的<input type="password">，用于输入口令；
+
+	单选框，对应的<input type="radio">，用于选择一项；
+
+	复选框，对应的<input type="checkbox">，用于选择多项；
+
+	下拉框，对应的<select>，用于选择一项；
+
+	隐藏文本，对应的<input type="hidden">，用户不可见，但表单提交时会把隐藏文本发送到服务器。
+
+获取值：
+// <input type="text" id="email">
+var input = document.getElementById('email');
+input.value; // '用户输入的值'
+
+上述方法可用于获取text、password、hidden以及select.
+对应radio和checkbox,实际上需要获取勾选的项，即checked的值：
+// <label><input type="radio" name="weekday" id="monday" value="1"> Monday</label>
+// <label><input type="radio" name="weekday" id="tuesday" value="2"> Tuesday</label>
+var mon = document.getElementById('monday');
+var tue = document.getElementById('tuesday');
+mon.value; // '1'
+tue.value; // '2'
+mon.checked; // true或者false
+tue.checked; // true或者false
+
+设置值
+与获取值类似，对于text、password、hidden以及select，直接设置value：
+// <input type="text" id="email">
+var input = document.getElementById('email');
+input.value = 'test@example.com'; // 文本框的内容已更新
+
+对于radio或checkbox,设置checked为true或false即可．
+
+HTML5控件
+HTML5新增大量标准控件，常用的包括date,datetime,datetime-local,color等，都使用<input>标签：
+<input type="date" value="2015-07-01">
+
+2015/07/01 该控件可操作！可删除，上下切换日期，还可以弹出日期选择框选择日期！
+
+<input type="datetime-local" value="2015-07-01T02:03:04">
+
+2015/07/01 上午02:03:04 该控件与上面控件一样可操作！
+
+<input type="color" value="#ff0000">
+颜色选择的控件，点击后可从颜色面板选择颜色！
+
+＊＊＊　H5控件继续学习　＊＊＊＊
+
+不支持H5的浏览器无法识别新控件，会当作type="text"来显示．
+支持H5的浏览器将获得格式化字符串，如type="date"类型的input的value将保证是一个有效的YYYY-MM-DD格式的日期，或者空字符串。
+
+提交表单
+两种方式：
+1. 通过<form>元素的submit()方法提交一个表单
+<!-- HTML -->
+<form id="test-form">
+    <input type="text" name="test">
+    <button type="button" onclick="doSubmitForm()">Submit</button>
+</form>
+
+<script>
+function doSubmitForm() {
+    var form = document.getElementById('test-form');
+    // 可以在此修改form的input...
+    // 提交form:
+    form.submit();
+}
+</script>
+
+这种方法不推荐，表单提交应该交给浏览器的默认执行，即点击<button type="submit">时或者用户在最后一个输入框按回车键时．
+2. 所以推荐的方法是响应<form>本身的onsubmit事件：
+<!-- HTML -->
+<form id="test-form" onsubmit="return checkForm()">
+    <input type="text" name="test">
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+function checkForm() {
+    var form = document.getElementById('test-form');
+    // 可以在此修改form的input...
+    // 继续下一步:
+    return true;
+}
+</script>
+
+注意：return true，告诉浏览器继续提交;如果输入有误，应该中止提交，则return false.
+
+<input type="hidden">的使用：
+比如登录时输入用户名和密码进行验证，通常的做法是：
+<!-- HTML -->
+<form id="login-form" method="post" onsubmit="return checkForm()">
+    <input type="text" id="username" name="username">
+    <input type="password" id="password" name="password">
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+function checkForm() {
+    var pwd = document.getElementById('password');
+    // 把用户输入的明文变为MD5:
+    pwd.value = toMD5(pwd.value);
+    // 继续下一步:
+    return true;
+}
+</script>
+
+上述做法有一个问题：用户输入了口令提交时，口令框的显示会突然从几个*变成32个*（因为MD5有32个字符）。
+
+可用<input type="hidden">来改进：
+<!-- HTML -->
+<form id="login-form" method="post" onsubmit="return checkForm()">
+    <input type="text" id="username" name="username">
+    <input type="password" id="input-password">
+    <input type="hidden" id="md5-password" name="password">
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+function checkForm() {
+    var input_pwd = document.getElementById('input-password');
+    var md5_pwd = document.getElementById('md5-password');
+    // 把用户输入的明文变为MD5:
+    md5_pwd.value = toMD5(input_pwd.value);
+    // 继续下一步:
+    return true;
+}
+</script>
+
+注意：id为"input-password"的<input>没有name属性，数据不会被提交．
+
+操作文件
+HTML表单中，可以上传文件的唯一控件就是<input type="file">．
+
+
+JavaScript可以在提交表单时对文件扩展名做检查，以便防止用户上传无效格式的文件：
+var f = document.getElementById('test-file-upload');
+var filename = f.value; // 'C:\fakepath\test.png'
+if (!filename || !(filename.endsWith('.jpg') || filename.endsWith('.png') || filename.endsWith('.gif'))) {
+    alert('Can only upload image file.');
+    return false;
+}
+
+H5的File API
+HTML表单中，上传文件的控件：<input type="file">。
+出于安全考虑，浏览器只允许用户点击<input type="file">来选择本地文件，用JavaScript对<input type="file">的value赋值是没有任何效果的。当用户选择了上传某个文件后，JavaScript也无法获得该文件的真实路径．(上传后，后台服务器处理，js无法获取该文件状态)．可在提交表单时对文件格式进行校验：
+var f = document.getElementById('test-file-upload');
+var filename = f.value; // 'C:\fakepath\test.png'
+if (!filename || !(filename.endsWith('.jpg') || filename.endsWith('.png') || filename.endsWith('.gif'))) {
+    alert('Can only upload image file.');
+    return false;
+}
+
+由于JS对用户上传的文件操作非常有限，无法读取文件内容．可以使用H5的File API获得文件信息并读取文件：
+var
+    fileInput = document.getElementById('test-image-file'),
+    info = document.getElementById('test-file-info'),
+    preview = document.getElementById('test-image-preview');
+// 监听change事件:
+fileInput.addEventListener('change', function () {
+    // 清除背景图片:
+    preview.style.backgroundImage = '';
+    // 检查文件是否选择:
+    if (!fileInput.value) {
+        info.innerHTML = '没有选择文件';
+        return;
+    }
+    // 获取File引用:
+    var file = fileInput.files[0];
+    // 获取File信息:
+    info.innerHTML = '文件: ' + file.name + '<br>' +
+                     '大小: ' + file.size + '<br>' +
+                     '修改: ' + file.lastModifiedDate;
+    if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
+        alert('不是有效的图片文件!');
+        return;
+    }
+    // 读取文件:
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var
+            data = e.target.result; // 'data:image/jpeg;base64,/9j/4AAQSk...(base64编码)...'            
+        preview.style.backgroundImage = 'url(' + data + ')';
+    };
+    // 以DataURL的形式读取文件:
+    reader.readAsDataURL(file);//异步读取文件．reader.onload是读取文件的回调，在读取结束后操作．
+});
+
+注意：以DataURL的形式读取到的文件是一个字符串，类似于data:image/jpeg;base64,/9j/4AAQSk...(base64编码)...，常用于设置图像。如果需要服务器端处理，把字符串base64,后面的字符发送给服务器并用Base64解码就可以得到原始文件的二进制内容(可以用'base64,'来分割字符串？)。
+
+AJAX
+Asynchronous JavaScript and XML
+AJAX请求异步执行，通过回调函数获得响应，写AJAX主要依靠XMLHttpRequest对象：
+'use strict';
+function success(text) {
+    var textarea = document.getElementById('test-response-text');
+    textarea.value = text;
+}
+
+function fail(code) {
+    var textarea = document.getElementById('test-response-text');
+    textarea.value = 'Error code: ' + code;
+}
+
+var request;
+if (window.XMLHttpRequest) {
+    request = new XMLHttpRequest();// 新建XMLHttpRequest对象
+} else {
+    request = new ActiveXObject('Microsoft.XMLHTTP');// 新建Microsoft.XMLHTTP对象，低版本IE不支持XMLHttpRequest.
+}
+
+request.onreadystatechange = function () { // 状态发生变化时，函数被回调
+    if (request.readyState === 4) { // 成功完成
+        // 判断响应结果:
+        if (request.status === 200) {
+            // 成功，通过responseText拿到响应的文本:
+            return success(request.responseText);
+        } else {
+            // 失败，根据响应码判断失败原因:
+            return fail(request.status);
+        }
+    } else {
+        // HTTP请求还在继续...
+    }
+}
+
+// 发送请求:
+//open方法第三个参数默认为true,使用异步．
+request.open('GET', '/api/categories');
+//发送请求，GET请求不需要参数，POST请求需要把body部分以字符串或者FormData对象传进去．
+request.send();
+
+//注意：使用alert会在弹出框点击确定后才会刷新页面，所以实际上尽量不用alert
+alert('请求已发送，请等待响应...');
+
+安全限制
+浏览器同源策略：默认情况下，JavaScript在发送AJAX请求时，URL的域名必须和当前页面完全一致,导致用JavaScript无法请求外域（就是其他网站）的URL．
+解决方法，JSONP, 其他方法不分析（flash插件，代理服务器）．
+JSONP只能用GET请求，并要求返回JavaScript.
+该方法利用了浏览器允许跨域引用JavaScript资源，以163股票查询url为例，原理：
+1. 点击刷新按钮，调用getPrice()，插入script节点到head中，触发浏览器跨域引用JavaScript资源(这里就是请求)，动态插入节点后head变为：
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="learn javascript by www.liaoxuefeng.com">
+    <title>JSONP学习－股票API调用</title>
+　　　　<script src="http://api.money.126.net/data/feed/0000001,1399001?callback=refreshPrice"></script>
+</head>
+
+2.该请求中callback=refreshPrice，即url请求完成时refreshPrice方法回调，将获取到的数据设置到'test-jsonp'中．
+
+完整html文件(vsc_project/js-learning/jsonp.html):
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="learn javascript by www.liaoxuefeng.com">
+    <title>JSONP学习－股票API调用</title>
+</head>
+
+<body>
+    <script>
+        function refreshPrice(data) {
+            var p = document.getElementById('test-jsonp');
+            p.innerHTML = '当前价格：' +
+                data['0000001'].name + ': ' +
+                data['0000001'].price + '；' +
+                data['1399001'].name + ': ' +
+                data['1399001'].price;
+        }
+        function getPrice() {
+            var
+                js = document.createElement('script'),
+                head = document.getElementsByTagName('head')[0];
+            js.src = 'http://api.money.126.net/data/feed/0000001,1399001?callback=refreshPrice';
+            head.appendChild(js);
+        }
+    </script>
+    <div>
+        <p id="test-jsonp"></p>
+        <p>
+            <button type="button" onclick="getPrice()">刷新</button>
+        </p>
+    </div>
+</body>
+
+</html>
+
+实际使用有个问题：每次点击都会在head节点插入script节点，导致N多的新增节点，分析？
+
+CORS
+Cross-Origin Resource Sharing，是HTML5规范定义的如何跨域访问资源。
+跨域请求时：请求头中
+Origin: http://my.com (本域)
+
+允许请求的响应：
+Access-Control-Allow-Origin: http://my.com 或者 *
+
+决定权在对方服务器中．
+上述的跨域请求也称为简单请求，包括GET,HEAD和POST(POST的Content-Type类型
+仅限application/x-www-form-urlencoded、multipart/form-data和text/plain),不能出行任何自定义头(例如，X-Custom: 12345)
+又例如，引用了某个第三方CDN上的字体文件时：
+/* CSS */
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('http://cdn.com/fonts/fontawesome.ttf') format('truetype');
+}
+如果该CDN服务商未正确设置Access-Control-Allow-Origin，那么浏览器无法加载字体资源。
+
+对于PUT,DELETE以及其他类型(比如application/json的POST请求)，浏览器会先发送一个OPTIONS请求（称为preflighted请求）到这个URL上，询问目标服务器是否接受：
+OPTIONS /path/to/resource HTTP/1.1
+Host: bar.com
+Origin: http://my.com
+Access-Control-Request-Method: POST
+
+服务器必须响应并明确指出允许的Method：
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://my.com
+Access-Control-Allow-Methods: POST, GET, PUT, OPTIONS
+Access-Control-Max-Age: 86400
+
+REST中常见以POST,PUT方法传送JSON格式数据，如果要跨域处理，服务器端必须正确响应OPTIONS请求．
+实际开发时，应该很少会跨域处理吧？
+
+Promise:
+AJAX异步操作的链式写法：
+var ajax = ajaxGet('http://...');
+ajax.ifSuccess(success)
+    .ifFail(fail);
+
+success与fail分别为请求成功或失败的回调函数，即＂承诺回调函数将来会执行＂的对象被称为Promise对象．
+举例：生成一个0-2之间的随机数，如果小于1，则等待一段时间后返回成功，否则返回失败：
+function test(resolve, reject) {
+    var timeOut = Math.random() * 2;
+    log('set timeout to: ' + timeOut + ' seconds.');
+    setTimeout(function () {
+        if (timeOut < 1) {
+            log('call resolve()...');
+            resolve('200 OK');
+        }
+        else {
+            log('call reject()...');
+            reject('timeout in ' + timeOut + ' seconds.');
+        }
+    }, timeOut * 1000);
+}
+
+上述函数为异步执行函数，用Promise对象来执行：
+new Promise(function (resolve, reject) {
+    log('start new Promise...');
+    var timeOut = Math.random() * 2;
+    log('set timeout to: ' + timeOut + ' seconds.');
+    setTimeout(function () {
+        if (timeOut < 1) {
+            log('call resolve()...');
+            resolve('200 OK');
+        }
+        else {
+            log('call reject()...');
+            reject('timeout in ' + timeOut + ' seconds.');
+        }
+    }, timeOut * 1000);
+}).then(function (r) {
+    log('Done: ' + r);
+}).catch(function (reason) {
+    log('Failed: ' + reason);
+});
+
+处理成了链式：
+new Promise(async(resolve, reject){ //异步任务中定义了回调
+	//TODO
+}.then(on_resolve(data){
+	//TODO
+}.catch(on_reject(data){
+	//TODO
+}
+
+使用Promise串行执行一系列需要异步计算的任务：
+job1.then(job2).then(job3).catch(handleError);
+job1、job2和job3都是Promise对象，也就是异步任务都需要返回Promise对象，才能链式一直下去．
+完整例子：
+
+'use strict';
+
+var logging = document.getElementById('test-promise2-log');
+while (logging.children.length > 1) {
+    logging.removeChild(logging.children[logging.children.length - 1]);
+}
+
+function log(s) {
+    var p = document.createElement('p');
+    p.innerHTML = s;
+    logging.appendChild(p);
+}
+
+//以上为定义log输出的函数，以及如果显示log.
+//以下为Promise串行执行：
+// 0.5秒后返回input*input的计算结果:
+function multiply(input) {
+    return new Promise(function (resolve, reject) {
+        log('calculating ' + input + ' x ' + input + '...');
+        setTimeout(resolve, 500, input * input);
+    });
+}
+
+// 0.5秒后返回input+input的计算结果:
+function add(input) {
+    return new Promise(function (resolve, reject) {
+        log('calculating ' + input + ' + ' + input + '...');
+        setTimeout(resolve, 500, input + input);
+    });
+}
+
+var p = new Promise(function (resolve, reject) {
+    log('start new Promise...');
+    resolve(123);
+});
+
+p.then(multiply)//p的resolve(123)，123作为参数执行下一个Promise
+ .then(add)//同理
+ .then(multiply)//同理
+ .then(add)//同理
+ .then(function (result) {//结束
+    log('Got value: ' + result);
+});
+
+注意：setTimeout用法，这里
+setTimeout(resolve, 500, input * input);
+相当于500ms之后，执行resolve(input * input);
+这里的setTimeout可以看作是模拟网络等异步执行的函数．
+
+使用Promise完成之前的AJAX例子：
+'use strict';
+
+// ajax函数将返回Promise对象:
+function ajax(method, url, data) {
+    var request = new XMLHttpRequest();
+    return new Promise(function (resolve, reject) {
+        request.onreadystatechange = function () {
+            if (request.readyState === 4) {
+                if (request.status === 200) {
+                    resolve(request.responseText);
+                } else {
+                    reject(request.status);
+                }
+            }
+        };
+        request.open(method, url);
+        request.send(data);
+    });
+}
+
+var log = document.getElementById('test-promise-ajax-result');
+var p = ajax('GET', '/api/categories');
+p.then(function (text) { // 如果AJAX成功，获得响应内容
+    log.innerText = text;
+}).catch(function (status) { // 如果AJAX失败，获得响应代码
+    log.innerText = 'ERROR: ' + status;
+});
+
+Promise并行执行异步任务（前面的异步执行事实上有顺序，前一个结果为后一个的输入，可以理解为是在同一个子线程中），并行时可认为是多线程分别执行不同的操作：
+(比如页面聊天系统，分别从不同url获得用户个人信息和好友列表)
+var p1 = new Promise(function (resolve, reject) {
+    setTimeout(resolve, 500, 'P1');
+});
+var p2 = new Promise(function (resolve, reject) {
+    setTimeout(resolve, 600, 'P2');
+});
+// 同时执行p1和p2，并在它们都完成后执行then:
+Promise.all([p1, p2]).then(function (results) {
+    console.log(results); // 获得一个Array: ['P1', 'P2']
+});
+
+
+//获取先返回的结果来处理，使用Promise.race():
+(比如，两个url读取用户个人信息，一读取到就拿来用，之后读取到的就可以不管了)
+var p1 = new Promise(function (resolve, reject) {
+    setTimeout(resolve, 500, 'P1');
+});
+var p2 = new Promise(function (resolve, reject) {
+    setTimeout(resolve, 600, 'P2');
+});
+Promise.race([p1, p2]).then(function (result) {
+    console.log(result); // 'P1'
+});
+
+Promise的用法和Rxjava比较类似．．．．
+
+Canvas
+HTML5新增组件，绘制图表动画等．
+一个Canvas定义了一个指定尺寸的矩形框，在这个范围内我们可以随意绘制：
+通常在<canvas>内部添加一些说明性HTML代码，如果浏览器支持Canvas，它将忽略<canvas>内部的HTML，如果浏览器不支持Canvas，它将显示<canvas>内部的HTML：
+
+<!-- HTML代码 -->
+<canvas id="test-canvas" width="200" heigth="100">
+    <p>你的浏览器不支持Canvas</p>
+</canvas>
+
+//通过canvas.getContext判断浏览器是否支持Canvas.
+<script>
+        var canvas = document.getElementById('test-canvas');
+        if(canvas.getContext){
+            alert('你的浏览器支持Canvas!');
+        }else{
+            alert('你的浏览器不支持Canvas!');
+        }
+    </script>
+
+绘制2D的对象：
+var ctx = canvas.getContext('2d');
+
+绘制3D的对象--HTML5的WebGL规范：
+var gl = canvas.getContext("webgl");
+
+这里用2d绘制，3d的部分查资料再研究．
+
+绘制形状：
+Canvas的坐标以左上角为原点(0,0)
+<script>
+        var canvas = document.getElementById('test-canvas');
+        var ctx = canvas.getContext('2d');
+
+        if (canvas.getContext) {
+            // alert('您的浏览器支持Canvas!');
+            //绘制图形
+            ctx.clearRect(0, 0, 200, 200); // 擦除(0,0)位置大小为200x200的矩形，擦除的意思是把该区域变为透明
+            ctx.fillStyle = '#dddddd'; // 设置颜色,也可以是red,green等
+            //这里宽高设置为500,500,只有宽度变为500,而高度没有变，为什么？
+            ctx.fillRect(10, 10, 130, 130); // 把(10,10)位置大小为130x130的矩形涂色
+            // 利用Path绘制复杂路径:
+            var path = new Path2D();
+            //圆点为(75,75)，半径为50画圆
+            //问题：为什么圆点是(75,75)?130 / 2 + 10
+            path.arc(75, 75, 50, 0, Math.PI * 2, true);
+            path.moveTo(110, 75);
+            path.arc(75, 75, 35, 0, Math.PI, false);
+            path.moveTo(65, 65);
+            path.arc(60, 65, 5, 0, Math.PI * 2, true);
+            path.moveTo(95, 65);
+            path.arc(90, 65, 5, 0, Math.PI * 2, true);
+            ctx.strokeStyle = '#0000ff';
+            ctx.stroke(path);
+        } else {
+            alert('您的浏览器不支持Canvas!');
+        }
+    </script>
+
+Path2D的api说明，arc函数：
+https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/arc
+
+//arc:弧形
+//x,y为弧形中心坐标；radius为半径
+//startAngle起始角度　endAngle结束角度　角度用的是弧度制，即：2PI为360度，1度＝PI/180度
+//anticlockwise是否逆时针画，默认为顺时针
+void ctx.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+
+画半圆时：
+path.moveTo(110, 75);
+path.arc(75, 75, 35, 0, Math.PI, false);
+如果角度反过来，改为：
+path.arc(75, 75, 35, Math.PI,　0, false);
+则画的时候，会先画一条直线(起点到其实角度对应的点），然后再画半圆
+
+绘制文本
+ //绘制文字
+        var
+            canvas = document.getElementById('test-text-canvas'),
+            ctx = canvas.getContext('2d');
+
+        ctx.clearRect(0, 200, canvas.width, canvas.height);
+        ctx.shadowOffsetX = 2;//阴影ｘ轴偏移量
+        ctx.shadowOffsetY = 2;//阴影ｙ轴偏移量
+        ctx.shadowBlur = 2;//阴影的模糊效果，越大越模糊,默认为0（太清晰）
+        ctx.shadowColor = '#666666';
+        ctx.font = '24px Arial';
+        ctx.fillStyle = '#333333';
+        //20为绘制文字的x轴起点，40为y轴起点（相对ctx的起点而言，ctx起点是(0,200)）
+        ctx.fillText('带阴影的文字', 20, 40);
+
+Canvas还可以实现动画，缩放，各种滤镜和像素转换等，如果要实现非常复杂的操作，考虑优化：
+通过创建一个不可见的Canvas来绘图，然后将最终绘制结果复制到页面的可见Canvas中；
+尽量使用整数坐标而不是浮点数；
+可以创建多个重叠的Canvas绘制不同的层，而不是在一个Canvas中绘制非常复杂的图；
+背景图片如果不变可以直接用<img>标签并放到最底层。
+
+错误处理
+try ... catch ... finally．
+错误类型：
+JavaScript有一个标准的Error对象表示错误，还有从Error派生的TypeError、ReferenceError等错误对象：
+
+try {
+    ...
+} catch (e) {
+    if (e instanceof TypeError) {
+        alert('Type error!');
+    } else if (e instanceof Error) {
+        alert(e.message);
+    } else {
+        alert('Error: ' + e);
+    }
+}
+
+抛出错误：
+var r, n, s;
+try {
+    s = prompt('请输入一个数字');
+    n = parseInt(s);
+    if (isNaN(n)) {
+        throw new Error('输入错误');
+    }
+    // 计算平方:
+    r = n * n;
+    alert(n + ' * ' + n + ' = ' + r);
+} catch (e) {
+    alert('出错了：' + e);
+}
+
+上面的例子如果不抛出错误，输入非数字时：
+NaN * NaN = NaN;
+并不会被当成错误．
+
+JavaScript允许抛出任意对象，包括数字、字符串。但是，最好还是抛出一个Error对象。
+
+错误传播
+如果在一个函数内部发生了错误，它自身没有捕获（没有try...catch），错误就会被抛到外层调用函数，如果外层函数也没有捕获，该错误会一直沿着函数调用链向上抛出，直到被JavaScript引擎捕获，代码终止执行。
+
+function main(s) {
+    console.log('BEGIN main()');
+    try {
+        foo(s);
+    } catch (e) {
+        alert('出错了：' + e);
+    }
+    console.log('END main()');
+}
+
+function foo(s) {
+    console.log('BEGIN foo()');
+    bar(s);
+    console.log('END foo()');
+}
+
+function bar(s) {
+    console.log('BEGIN bar()');
+    console.log('length = ' + s.length);
+    console.log('END bar()');
+}
+
+main(null);
+
+上述例子中，bar()函数中处理时报错，上抛到main()中被捕获处理．
+
+异步错误处理
+涉及到异步代码，无法在调用时捕获，原因就是在捕获的当时，回调函数并未执行。
+function printTime() {
+    throw new Error();
+}
+
+try {
+    setTimeout(printTime, 1000);
+    console.log('done');
+} catch (e) {
+    alert('error');
+}
+
+上述抛出错误并不会被捕获．
+所以异常的错误处理，需要在该回调中处理，而不是抛出到调用的地方：
+举例，表单按钮的点击事件：
+<form>
+    <input id="x"> + <input id="y">
+    <button id="calc" type="button">计算</button>
+</form>
+
+'use strict';
+
+var $btn = $('#calc');
+
+// 取消已绑定的事件:
+$btn.off('click');
+
+try {
+    $btn.click(function () {
+　　　　　　try{
+        var
+            x = parseFloat($('#x').val()),
+            y = parseFloat($('#y').val()),
+            r;
+        if (isNaN(x) || isNaN(y)) {
+            throw new Error('输入有误');
+        }
+        r = x + y;
+        alert('计算结果：' + r);
+       }catch(e){
+	  alert('输入有误!');	
+	}
+    });
+} catch (e) {
+    alert('输入有误！');
+}
+
+
