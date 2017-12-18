@@ -13,8 +13,11 @@ var sprintfWrapper = {
       if (typeof arguments[0] != "string") { return null; }
       //RegExp是js的对象，代表正则表达式,这里加判断是防止对象被修改？思考：什么时候会去修改RegExp对象呢？
       if (typeof RegExp == "undefined") { return null; } 
+      //第一个参数为格式化字符串，比如%d,%.3f，％s等
       var string = arguments[0];
       //正则表达式用法，详细见regexp.js
+      //这里全局匹配，匹配%开始，后接 %或者以下0或1个：-或+(或\x20：空格)或0或一个以上数字或.数字 再接[bcdfosxX]任一个
+      //举例，匹配：%%, %-d,%+03f,%.3f,%s等等
       var exp = new RegExp(/(%([%]|(\-)?(\+|\x20)?(0)?(\d+)?(\.(\d)?)?([bcdfosxX])))/g);
       var matches = new Array();
       var strings = new Array();
@@ -26,6 +29,9 @@ var sprintfWrapper = {
       var match = null;
       var substitution = null;
       while (match = exp.exec(string)) {
+        //这里是如何匹配的？比如sprintf('%f',3.14):match = exp.exec('%f')，见regexp.js最后的详情分析
+        //这里将匹配成：%f,%f,f,,,,,,,f match[9]为f
+        console.log('match: ' + match);
         if (match[9]) { convCount += 1; }
         stringPosStart = matchPosEnd;
         stringPosEnd = exp.lastIndex - match[0].length;
@@ -117,11 +123,14 @@ var sprintfWrapper = {
   }
   var sprintf = sprintfWrapper.init;
 
+  //match: %f,%f,f,,,,,,,f
   console.log(sprintf('%f',3.14));//3.140000,与python一样，默认小数点后６位
   var a = 10;
+  //match: %d,%d,d,,,,,,,d match: %o,%o,o,,,,,,,o match: %x,%x,x,,,,,,,x match: %X,%X,X,,,,,,,X
   console.log(sprintf('dec=%d oct=%o hexLowerCase=%x hexUpCase=%X',a,a,a,a));//dec=10 oct=12 hexLowerCase=a hexUpCase=A
   console.log(sprintf());//null
 
+  //match: %.3f,%.3f,.3f,,,,,.3,3,f
   console.log(sprintf('%.3f',3.14));//3.140
 
   //RegExp修改后，new RegExp报错：TypeError: RegExp is not a constructor
