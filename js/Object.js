@@ -6,8 +6,9 @@ var person = {
     age:30
 }
 
-console.log(person.name);//nick
-console.log(person['name'])//nick
+console.log(person);//{ name: 'nick', age: 30 }
+console.log(person.name);//nick python不能这样用
+console.log(person['name'])//nick python用法相同
 console.log(person.address);//undefined
 console.log(person.toString);//[Function:toString] 继承而来
 console.log('toString' in person);//true
@@ -20,6 +21,10 @@ console.log(person.hasOwnProperty('country'));//true
 
 person['address'] = 'Xiamen';
 console.log(person.hasOwnProperty('address'));//true
+
+//如何删除属性？ python的dict使用pop(key)可以删除key
+delete person.name;//这里为什么可以这样用呢？？？delete关键字的用法，不能删除变量，可以删除属性
+console.log(person);//{ age: 30, country: 'China', address: 'Xiamen' }
 
 //属性为非有效变量
 var student = {
@@ -97,14 +102,14 @@ console.log(Math.max.call(null,3,5,4));//5
 
 //使用apply动态改变函数行为
 //*************************复制以下代码到浏览器的console中执行 */
-var oldParseInt = window.parseInt;//window在浏览器中使用
-var count = 0;
+// var oldParseInt = window.parseInt;//window在浏览器中使用
+// var count = 0;
 
-window.parseInt = function(){
-    count++;
-    return oldParseInt.apply(null,arguments);
-}
-console.log(parseInt('10'));//10
-console.log(parseInt('20'));//20
-console.log(count);//2
+// window.parseInt = function(){
+//     count++;
+//     return oldParseInt.apply(null,arguments);
+// }
+// console.log(parseInt('10'));//10
+// console.log(parseInt('20'));//20
+// console.log(count);//2
 //********************************************************* */

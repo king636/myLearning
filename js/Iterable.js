@@ -2,7 +2,7 @@
 'use strict'
 
 //Array,Map,Set均属于iterable．Map和Set无法使用索引遍历内容
-//iterable使用for...of来遍历内容
+//iterable使用for...of来遍历内容，python的for...in类似
 var arr = [1,2,3];
 var map = new Map([['name','nick'],['age',30]]);
 var set = new Set([1,2,3]);

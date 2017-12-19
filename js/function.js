@@ -1,6 +1,14 @@
 //函数
 'use strict'
 
+//内置函数，Math.abs() python的是abs()
+console.log(Math.abs(-20));//20
+//python的abs()参数超过１个会报错，js不会
+console.log(Math.abs(-20,1,2));//20
+//参数类型不对，返回NaN
+console.log(Math.abs('a'));//NaN
+console.log(Math.max(1,8,3,5))//8
+
 function add(x){
     return x + 1;
 }
@@ -28,6 +36,21 @@ var add3 = function(x){
     return x + 1;
 }
 // console.log(add3());
+
+//python中判断x的类型: isinstance(x,(int,float))
+var my_abs_extend = function(x){
+    if(typeof x !== 'number')
+        throw('bad operand type');//python抛异常：raise TypeError('bad operand type')
+
+    if(x >= 0)
+        return x;
+    else
+        return -x;
+}
+
+//console.log('my_abs_extend ' + my_abs_extend('a'));//异常：bad operand type
+console.log('my_abs_extend ' + my_abs_extend(-20));//my_abs_extend 20
+console.log('my_abs_extend ' + my_abs_extend(3.14));//my_abs_extend 3.14
 
 //arguments
 //arguments类似Array,但不是Array.怎么理解？

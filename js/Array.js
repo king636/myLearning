@@ -4,9 +4,10 @@
 var arr = [1,2,3,'hello'];
 console.log(arr);//[ 1, 2, 3, 'hello' ]
 console.log(arr.length);//4
+console.log(arr[-1]);//undefined,而在python中将返回最后一个元素
 console.log(arr.indexOf(3));//2
 console.log(arr.indexOf('3'));//-1 不存在则返回-1
-arr[5] = 5;//超过范围，导致arr的长度变大
+arr[5] = 5;//超过范围，导致arr的长度变大.python不能越界赋值与访问
 console.log(arr);//[ 1, 2, 3, 'hello', , 5 ]
 console.log(arr[4]);//undefined
 console.log(arr.length);//6
@@ -32,11 +33,13 @@ console.log(b);//[ 1, 2, 3, 'hello', , 5 ]
 console.log(arr === b);//false
 
 //push和pop
-//push:数组尾部添加元素
-//pop:尾部删除元素
+//push:数组尾部添加元素 python中的list用append()
+//pop:尾部删除元素　与python相同
 arr.push('add');
 console.log(arr);//[ 'change', 2, 3, 'hello', , 5, 'add' ]
-console.log(arr.pop());//add
+//这里pop(2)参数无效，只删除尾部元素．而python的pop参数可以删除指定位置元素
+//js删除指定位置元素，参考下面的splice()用法
+console.log(arr.pop());//add 
 console.log(arr);//[ 'change', 2, 3, 'hello', , 5 ]
 arr.pop();
 console.log(arr);//[ 'change', 2, 3, 'hello',  ]
@@ -49,7 +52,7 @@ console.log(arr.pop());//change
 console.log(arr.pop());//undefined
 console.log(arr);//[]
 
-//unshift和shift
+//unshift和shift  python没有头部删除和添加元素的函数，事实上用索引０操作就够了，尾部用长度来操作应该也够了．
 //unshift:数组头部添加元素
 //shift(换档，去掉):头部删除元素
 arr = [1,2,3,4,5];

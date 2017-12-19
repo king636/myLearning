@@ -80,3 +80,12 @@ console.log(set);//Set { [ 1, 5, 6 ], 2, 3 }
 /**
  * 问题还是到底什么时候对象不能满足使用map或者set的需求？
  */
+
+// ## python的dict和set,就和js的Object,Map以及Set很类似．
+// ## python的set与js的Set用法基本相同，区别在于两个地方：
+// # 1. js中，var set = new Set([1,2,3]); 而python是　s = set([1,2,3])
+// # 2. 删除key时，python用remove(key);而js用delete(key)
+// # 3. python的dict和set的key都不能是list;而js中key可以是数组
+
+// ####### python对比js,python使用dict和set;而js使用了对象，Map和Set,目前暂不知道什么情况要用Map而对象不满足？
+// ####### js更灵活，但不容易掌握；python严格，但容易理解
