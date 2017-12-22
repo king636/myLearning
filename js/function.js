@@ -118,6 +118,7 @@ var person = {
         country:'China'
     }
 }
+// 注意：python的dict解构时，只能解构到list或tuple里面去
 var {name,address:{city,country:motherland},gender,single = true} = person;
 console.log('name: ' + name + ', address city: ' + city);//name: nick, address city: Xiamen
 //不存在为undefined
@@ -144,4 +145,107 @@ function buildDate({year,month,day,hour = 0,minute = 0,second = 0}){
 
 console.log(buildDate({year:2017, month:12, day:7}));//2017-12-06T16:00:00.000Z
 
+//对象的方法：对象中绑定的函数
+var nick = {
+    name:'nick',
+    birth:1990,
+    age:function(){
+        let year = new Date().getFullYear();
+        return year - this.birth;
+    }
+}
+
+console.log(nick.age);//[Function: age]
+console.log(nick.age());//27
+
+//js坑太多，注意age的方法里面this的用法，调用nick.age()时this指向当前对象nick,所以没有问题．
+//修改下：
+var getAge = nick.age;
+//报错：TypeError: Cannot read property 'birth' of undefined．因为this指向了undefined
+// console.log(getAge());
+
+//使用apply改变this的指向,参数为空
+console.log(getAge.apply(nick,[]));//27
+//或者使用call,这里参数省略
+console.log(getAge.call(nick));//27
+
+//如果对age函数重构，也会有坑
+// var bob = {
+//     name:'bob',
+//     birth:1990,
+//     age:function(){
+//         function getAgeFromBirth(){
+//             let year = new Date().getFullYear();
+//             return year - this.birth;
+//         }
+//         return getAgeFromBirth();
+//     }
+// }
+
+//报错：TypeError: Cannot read property 'birth' of undefined
+//age内部的函数this也指向了undefined
+// console.log(bob.age());
+
+//所以要进一步修改,先保存this的指向
+var cathy = {
+    name:'cathy',
+    birth:1990,
+    age:function(){
+        var that = this;
+        function getAgeFromBirth(){
+            let year = new Date().getFullYear();
+            return year - that.birth;
+        }
+        return getAgeFromBirth();
+    }
+}
+
+console.log(cathy.age());//27
+
+//apply和call,区别在于参数，apply的参数是Array,而call不需要
+//普通函数不需要指向对象，让this指向null即可，指向对象也不会有问题
+console.log(Math.max.apply(null,[2,5,3,1]));//5
+console.log(Math.max.call(null,2,5,3,1));//5
+console.log(Math.max.call(cathy,2,5,3,1));//5
+
+//使用apply()改变函数行为,叫做装饰器
+//比如用计算调用了几次paseInt()方法，可以改写方法
+var oldParseInt = parseInt;
+// console.log(oldParseInt('10'));//10
+// parseInt = function(x){
+//     return oldParseInt(x);
+// }
+// console.log(parseInt('20'));//20
+
+//以下这种写法会返回NaN
+// parseInt = function(){
+//     for(let arg of arguments)
+//         console.log(arg);//20
+//     // return oldParseInt(arguments);//NaN，因为arguments是一个数组，原来的parseInt函数接收数组就会返回NaN.除非传入arguments[0]
+//     return oldParseInt(arguments[0]);//20
+// }
+// console.log(parseInt('20'));//20
+
+var count = 0;
+parseInt = function(){
+    count++;
+    return oldParseInt.apply(null,arguments);
+    //这里如果写成 oldParseInt(arguments) 将返回NaN
+    //如果apply改成call也将返回NaN,因为arguments对应的是Array
+    //用call,除非这样
+    // return oldParseInt.call(null,arguments[0]);
+}
+
+console.log(parseInt('10'));//10
+console.log(parseInt('20'));//20
+console.log(parseInt('30'));//30
+
+console.log('count:' + count);//count:3
+
 //高阶函数
+//一个函数的参数接收另外一个函数，这个函数就称为高阶函数
+function fn(x,y,z){
+    return z(x) + z(y);
+}
+
+console.log(fn(-1,3,Math.abs));//4

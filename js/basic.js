@@ -100,6 +100,10 @@ console.log(a.toUpperCase());//中文
 console.log(a.toLowerCase());//中文
 console.log(a.indexOf('文'));//1
 console.log(s.substring(1,3));//ex
+//string也可以直接用array的slice()方法来获取子串
+console.log('string slice: ' + s.slice(1,3));//string slice: ex
+//string调用array的splice()方法则不行
+// console.log('string splice: ' + s.splice(0,1,'a','b'));
 console.log(s.substring(2));//xt
 console.log(s.substring());//Text,不给参数则为整个字符串
 a = s;

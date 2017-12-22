@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# python内置的list数据类型，与js的Array类似
-# 写法与js相同
+# python内置的list与tuple数据类型，与js的Array类似
+# list写法与js的Array相同
 list = [1,2,3,'hello']
 # [1, 2, 3, 'hello']
 print(list)
