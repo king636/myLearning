@@ -33,36 +33,44 @@ print(str[1:5])
 # 135
 print(str[::2])
 
-##　练习，利用切片，去掉字符串首尾空格(首尾可能有多个空格)
-# trip()函数是可以实现去除首尾的空格，这里用自定义的方法实现
-# 1，利用正则表达式实现，如下：
+##　练习，去掉字符串首尾空格(首尾可能有多个空格)
+# strip()函数是可以实现去除首尾的空格
+# str.strip(char),移除首尾指定的字符生成新的字符串,默认移除空格
+def trim(s):
+    return s.strip()
+
+# 利用自定义函数实现：
+# 1，正则表达式实现，如下：
 import re
 
+## 匹配字符串首尾可能是空格
 reg = r'^(\s*)([\w\s]+?)(\s*)$'
 def trim(s):
-    print('s=',s)
-    print('s.len=',len(s))
+    ##　判断字符串无内容
     if len(s) == 0:
+        return ''
+    ## 判断字符串只包含空格（是否有更好的方式？）
+    if re.match(r'^(\s*)(\s*)$', s):
         return ''
     gr = re.match(reg,s)
     #注意，这里有个坑：如果分组匹配完比如('','hello',' '),这时group(2)才是'hello',why?
-    print(gr.groups())
-    # print(gr.group(0))
-    # print(gr.group(1))
-    # print(gr.group(2))
     return gr.group(2)
 
-# trim('hello')
-# def trim(s):
-#     if s is None or len(s) == 0:
-#         return ''
-#     if s[0] == ' ':
-#         s = s[1:]
-#     length = len(s)
-#     if s[length - 1] == ' ':
-#         s = s[-length:-1]
+# 2，利用切片方式实现
+# 想法：从首开始，索引移动到第一个非空格；同样从尾开始，索引移动到第一个非空格．根据两次的索引来截取
+def trim(s):
+    if len(s) <= 0:
+        return ''
     
-#     return;
+    head = 0
+    foot = -1
+    while head < len(s) and s[head] == ' ':
+        head = head + 1
+
+    while foot >= -len(s) and s[foot] == ' ':
+        foot = foot - 1
+
+    return s[head:len(s) + 1 + foot]
 
 if trim('hello ') != 'hello':
     print('测试失败!')
