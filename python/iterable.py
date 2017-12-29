@@ -4,7 +4,7 @@
 # 本节分析迭代，列表生成式，生成器和迭代器
 
 # 迭代
-# 与js的迭代类似，js的Array Map和Set都属性迭代器，可以用for...of来遍历
+# 与js的迭代类似，js的Array Map和Set都属于迭代器，可以用for...of来遍历
 # 而python的list tuple dict和set也都是可迭代对象，可以用for...in来遍历
 
 # 判断是否可迭代，前面可变参数那有做说明：
@@ -214,3 +214,28 @@ while True:
     except StopIteration as e:
         print(e.value)
         break
+
+
+### 练习：杨晖三角
+# 期待输出:
+# [1]
+# [1, 1]
+# [1, 2, 1]
+# [1, 3, 3, 1]
+# [1, 4, 6, 4, 1]
+# [1, 5, 10, 10, 5, 1]
+# [1, 6, 15, 20, 15, 6, 1]
+# [1, 7, 21, 35, 35, 21, 7, 1]
+# [1, 8, 28, 56, 70, 56, 28, 8, 1]
+# [1, 9, 36, 84, 126, 126, 84, 36, 9, 1]
+
+def triangles(max):
+    L = []
+    n = 0
+    while n < max:
+        L.append(1)
+        yield L
+        
+
+
+    return "done"
