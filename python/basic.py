@@ -75,6 +75,17 @@ print(r'多行的时候\n可以换行输出')
 print(r'''多行的时候
 可以换行输出''')
 
+# 转大写
+# to upper NICK
+print('to upper','nick'.upper())
+# 转小写
+# to lower nick
+print('to lower','NICK'.lower())
+
+# 截取子串,参考slice.py中切片的说明
+# bc
+print('abc'[1:])
+
 #布尔值：True False 注意首字母大写 (js中为小写：true false)
 #布尔值运算 and or not
 #js中&& || !

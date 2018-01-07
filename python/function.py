@@ -228,12 +228,12 @@ print(calc(1,2,3))
 # 不能再传入list了，报错：TypeError: can't multiply sequence by non-int of type 'list'
 # print(calc([1,2,3]))
 # 这时要改为：
-list = [1,2,3]
+li = [1,2,3]
 # 14
-print(calc(list[0],list[1],list[2]))
+print(calc(li[0],li[1],li[2]))
 # 再改：*list 表示把list的所有元素作为可变参数传入
 # 14
-print(calc(*list))
+print(calc(*li))
 # 0
 print(calc())
 

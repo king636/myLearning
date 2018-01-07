@@ -3,6 +3,7 @@
  * map and reduce 都是高阶函数
  */
 //map把函数作用在Array的每一个元素并把结果生成一个新的Array．
+// python中的map是把函数作用在一个iterable上并返回一个iterator
 //调用map函数的array本身没有变
 var fn = function(x){
     return x * x;

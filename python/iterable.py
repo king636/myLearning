@@ -229,13 +229,60 @@ while True:
 # [1, 8, 28, 56, 70, 56, 28, 8, 1]
 # [1, 9, 36, 84, 126, 126, 84, 36, 9, 1]
 
-def triangles(max):
-    L = []
-    n = 0
-    while n < max:
-        L.append(1)
-        yield L
+# def triangles(max):
+#     L = []
+#     n = 0
+#     while n < max:
+#         L.append(1)
+#         yield L
         
 
 
-    return "done"
+#     return "done"
+
+### 迭代器 Iterator
+#注意与Iterable不同，Iterable表示可迭代的：包括list tuple dict set str generator等，只要可以作用于for循环的
+#就是可迭代的．但是generator还可以被next()调用并不断返回下一个值，称为Iterator.
+## 判断Iterable或者Iterator
+from collections import Iterable
+# True
+print(isinstance([],Iterable))
+# True
+print(isinstance((),Iterable))
+# True
+print(isinstance({},Iterable))
+# True
+print(isinstance({'name':'nick','age':12},Iterable))
+# True
+print(isinstance('abc',Iterable))
+# True
+print(isinstance((x for x in range(10)),Iterable))
+# False
+print(isinstance(100,Iterable))
+
+from collections import Iterator
+# False
+print(isinstance([],Iterator))
+# False
+print(isinstance((),Iterator))
+# False
+print(isinstance({},Iterator))
+# False
+print(isinstance({'name':'nick','age':12},Iterator))
+# False
+print(isinstance('abc',Iterator))
+# True
+print(isinstance((x for x in range(10)),Iterator))
+# False
+print(isinstance(100,Iterator))
+
+### 非generator的Iterable可以转换成Iterator
+# True
+print(isinstance(iter('abc'),Iterator))
+
+# <str_iterator object at 0x7f1464bc97b8>
+print(iter('abc'))
+# <list_iterator object at 0x7fe8d09277b8>
+print(iter([1,2,3,4,5]))
+
+### generator对象，用iter()转换的str_iterator list_iterator，以及高阶函数中map对象等等，都是iterator.

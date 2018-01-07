@@ -1,0 +1,15 @@
+对本书重读，并在android studio中创建相应的project，进行记录跟踪．
+
+一,
+Android的编译工具(命令行编译工具)：maven/ant 了解即可，不需要深入
+Android的MVC设计模式
+model:
+view:
+controller:
+
+项目说明：１．使用AS中的ConstraitLayout布局
+之后的项目尽量使用该布局，避免嵌套布局的性能问题：
+https://mp.weixin.qq.com/s/gGR2itbY7hh9fo61SxaMQQ
+http://blog.csdn.net/lmj623565791/article/details/78011599?utm_source=tuicool&utm_medium=referral
+http://blog.csdn.net/guolin_blog/article/details/53122387
+
