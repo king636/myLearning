@@ -49,7 +49,7 @@ Windows还是好用，被Ubuntu折磨这一年多，还是用回windows吧(ubunt
 
 注：关于python虚拟环境
 可以安装python虚拟环境来管理多个python项目，如果未使用虚拟环境，每个库都是全局使用．
-所以使用虚拟环境是很有好处的，包括项目打包后，导入使用不会有各种兼容性问题．
+所以使用虚拟环境是很有好处的，包括项目打包后给别人使用，只要python版本相同，导入使用不会有各种兼容性问题．
 所以，给自己定个规定，所有的项目都在virtualenv下开发．
 
 安装virtualenv: pip install virtualenv
@@ -66,5 +66,10 @@ from bs4 import BeautifulSoup
 
 释放退出虚拟环境：quit()　先退出python环境
 deactivate 退出虚拟环境
+
+3. 编辑器使用：vsc不支持xp安装，搜索后使用pycharm作为python开发ide来使用．
+pycharm安装后，xp中无法运行．．．．还是安装个win7虚拟机来用吧．
+pycharm使用教程:http://www.phperz.com/article/14/1213/14349.html
+
 
 
