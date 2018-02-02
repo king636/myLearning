@@ -1,0 +1,58 @@
+1.新建MyMVP项目
+与google项目保持一致，选择最低支持api14,选择Navigation Drawer Activity.
+创建后默认MainActivity布局为DrawerLayout(id:drawer_layout)，
+包含内容布局(app_bar_main)与NavigationView(nav_view)实现侧滑功能．
+drawer_layout
+	app_bar_main
+	nav_view
+
+网上有人说app_bar_main内容布局需要放在nav_view前面，事实上并不需要(api文档里也说要按顺序，保险起见，还是都按顺序来布局吧)．
+使用方式：直接看api文档说明
+http://www.android-doc.com/reference/android/support/v4/widget/DrawerLayout.html
+
+DrawerLayout acts as a top-level container for window content that allows for interactive "drawer" views to be pulled out from the edge of the window.
+DrawerLayout是一个顶层容器，用来与drawer交互实现从窗口边缘的侧滑．
+Drawer positioning and layout is controlled using the android:layout_gravity attribute on child views corresponding to which side of the view you want the drawer to emerge from: left or right. (Or start/end on platform versions that support layout direction.)
+左侧滑还是右侧滑通过nav_view中设置android:layout_gravity来实现．
+To use a DrawerLayout, position your primary content view as the first child with a width and height of match_parent. Add drawers as child views after the main content view and set the layout_gravity appropriately. Drawers commonly use match_parent for height with a fixed width.
+内容布局的宽高都设置为match_parent,侧滑的drawer通常设置高度match，宽度为指定的值（也就是说宽高都可以设置）
+DrawerLayout.DrawerListener can be used to monitor the state and motion of drawer views. Avoid performing expensive operations such as layout during animation as it can cause stuttering; try to perform expensive operations during the STATE_IDLE state. DrawerLayout.SimpleDrawerListener offers default/no-op implementations of each callback method.
+通过DrawerListener来监听侧滑view的状态，在动画时操作侧滑可能造成不流畅体验，所以应该在空闲时操作侧滑．DrawerListener包含的方法：
+onDrawerClosed(View drawerView)
+onDrawerOpened(View drawerView)
+onDrawerSlide(View drawerView, float slideOffset)
+onDrawerStateChanged(int newState)
+
+SimpleDrawerListener：Stub/no-op implementations of all methods of DrawerLayout.DrawerListener.
+上面这句话不知道怎么理解．DrawerListener时一个interface,而SimpleDrawerListener实现了该接口．具体使用的时候再分析吧．
+As per the Android Design guide, any drawers positioned to the left/start should always contain content for navigating around the application, whereas any drawers positioned to the right/end should always contain actions to take on the current content. This preserves the same navigation left, actions right structure present in the Action Bar and elsewhere.
+根据android的设计指导，左侧的任何drawer都应该包含导航的内容，右侧的任何drawer都应该包含对当前内容的操作．也就是说左侧滑和右侧滑对应的布局内容的设计是不一样的．
+
+根据文档，侧滑的方向由nav_view中设置android:layout_gravity来确定，这里以实际布局为例：
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">　
+//fitsSystemWindows如果设置，可以在Design视图中看到，整个DrawerLayout的高度与app的高度匹配，如果不设置，DrawerLayout的高度是在App的标题栏下面．（4.4的手机运行后发现是一样的）
+//这里openDrawer的作用是：设置start时就可以在布局的Design视图上看到侧滑的导航nav_view,如果这里设置end或者不设置，那么Design视图中看不到nav_view.实际运行时不影响nav_view的侧滑．注意这个属性是属于tools:
+
+    <include
+        layout="@layout/app_bar_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/activity_main_drawer" />
+
+</android.support.v4.widget.DrawerLayout>

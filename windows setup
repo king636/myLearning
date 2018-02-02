@@ -1,0 +1,83 @@
+windos下的git环境配置
+1. git环境（安装git客户端，连接github）
+https://git-scm.com/download 
+windows版本下载
+
+这里由于git网站网速太慢，百度下载了v2.16.0.2版本，默认安装即可．
+安装后，电脑任意目录，右键可打开git bash.
+这里在win7　D盘新建目录git,目录下打开git bash,设置：
+git config --global user.name nic
+git config --global user.email lovefornic@163.com
+配置公钥:
+ssh-keygen -t rsa -C lovefornic@163.com
+提示输入文件名，这里输入key
+passphrase直接回车跳过，之后就生成了key key.pub
+查看公钥内容cat key.pub (这里不知道为什么第一次查看无内容，重进git bash后可以)
+到github上，进入setting->SSH and GPG keys->New SSH key
+新建title：my_vir_win7 添加key.pub中的内容即可．
+
+win7中，d:/git目录下clone　github上项目：
+git clone https://github.com/king636/myLearning
+即可
+
+windows下的python3安装
+https://www.python.org/downloads/下找到python3.6.4版本，点击进入选择windows installer下载后，直接运行安装．
+记得安装时选择添加到path,安装后进入cmd,运行python即可(有显示版本)．查看python版本：python --version
+退出python环境：quit()
+pip也一起安装了
+pip版本是9.0.1 (pip --version)
+
+可查看path:C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Scripts\;C:\Users\Administrator\AppData\Local\Programs\Python\Python36\
+python自动添加到path路径了，而python36\Scripts目录下则可看到pip easy_install
+
+根据python爬虫教程，安装python虚拟环境：
+pip install virtualenv
+安装成功后可在Scripts目录下看到virtualenv
+新建d:\python_projects目录，创建虚拟环境:
+virtualenv scrpingEnv
+
+激活并使用:
+cd scrapingEnv
+cd Scripts
+activate
+
+安装beautifulsoup(虚拟环境先激活，则安装都是在该虚拟环境下):
+pip install beautifulsoup
+安装成功，验证：
+先进入python环境：
+python
+from bs4 import BeautifulSoup 不报错则导入成功（事实上，这边测试发现退出虚拟环境后，也能导入BeautifulSoup,why???）
+
+释放并退出虚拟环境：
+quit()　先退出python
+deactivate 此时也是在Scripts目录下
+
+安装Python的ide开发环境pycharm:pycharm-community-2017.3.3.exe
+成功安装后，打开新建项目：d:\python_projects\Scraping
+事实上这里和命令行中创建python虚拟环境是一样的．
+项目创建后，可在Scraping下看到venv目录，下面的结构和前面创建的scrapingEnv是一样的．
+所以之后就用pycharm来维护项目就可以了．如此方便
+
+node环境安装
+https://nodejs.org/en/download/
+选择windows installer 64-bit，下载后直接安装，记得安装时选择添加到Path(默认是选择的).
+安装后，cmd中运行:
+node -v 查看nodejs版本
+npm -v 查看npm版本(这里npm自动被安装了)
+
+如果要更改npm安装包的路径以及缓存的路径，可单独进行设置，这里使用默认，如要设置，百度之．
+
+进入node开发环境:
+node
+如果要退出，可按两次ctrl+c, 或者输入.exit
+
+安装sourceinsight:sourceinsight4087-setup.exe
+这里由于虚拟机win7的c盘容量太小，将source insight安装到了d:\source_insight下．
+导入并打开ｃ项目
+
+这些环境都安装好后，ghost备份
+
+
+
+
+

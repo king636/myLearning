@@ -1,0 +1,34 @@
+1. clone和切换分支
+git clone git@github.com:googlesamples/android-architecture.git
+cd android-architecture
+git checkout todo-mvp　(切换分支后可看到todoapp目录，as中打开即可)
+
+as中导入项目，运行，提示sqlite-jdbc.jar无法下载，尝试后，只能gradle中设置为：
+repositories {
+        maven{url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        google()
+    }
+
+(如果要学习其他分支，checkout到其他分支即可)
+
+查看有如下分支 git branch -a:
+* master
+  remotes/origin/HEAD -> origin/master
+  remotes/origin/deprecated-todo-databinding
+  remotes/origin/deprecated-todo-mvp-contentproviders
+  remotes/origin/deprecated-todo-mvp-loaders
+  remotes/origin/dev-todo-mvp-clean-fix-memory-leak
+  remotes/origin/dev-todo-mvp-kotlin
+  remotes/origin/dev-todo-mvp-tablet
+  remotes/origin/dev-todo-mvvm-live
+  remotes/origin/dev-todo-mvvm-live-kotlin
+  remotes/origin/dev-todo-mvvm-rxjava
+  remotes/origin/master
+  remotes/origin/revert-375-feature/mikeBreaksThenHeFixes
+  remotes/origin/todo-mvp
+  remotes/origin/todo-mvp-clean
+  remotes/origin/todo-mvp-dagger
+  remotes/origin/todo-mvp-rxjava
+  remotes/origin/todo-mvvm-databinding
+  remotes/origin/todo-mvvm-live
+

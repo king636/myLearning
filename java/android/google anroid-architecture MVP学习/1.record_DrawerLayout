@@ -1,0 +1,90 @@
+1.新建MyMVP项目
+与google项目保持一致，选择最低支持api14,选择Navigation Drawer Activity.
+创建后默认MainActivity布局为DrawerLayout(id:drawer_layout)，
+包含内容布局(app_bar_main)与NavigationView(nav_view)实现侧滑功能．
+drawer_layout
+	app_bar_main
+	nav_view
+
+网上有人说app_bar_main内容布局需要放在nav_view前面，事实上并不需要(api文档里也说要按顺序，保险起见，还是都按顺序来布局吧)．
+使用方式：直接看api文档说明
+http://www.android-doc.com/reference/android/support/v4/widget/DrawerLayout.html
+
+DrawerLayout acts as a top-level container for window content that allows for interactive "drawer" views to be pulled out from the edge of the window.
+DrawerLayout是一个顶层容器，用来与drawer交互实现从窗口边缘的侧滑．
+Drawer positioning and layout is controlled using the android:layout_gravity attribute on child views corresponding to which side of the view you want the drawer to emerge from: left or right. (Or start/end on platform versions that support layout direction.)
+左侧滑还是右侧滑通过nav_view中设置android:layout_gravity来实现．
+To use a DrawerLayout, position your primary content view as the first child with a width and height of match_parent. Add drawers as child views after the main content view and set the layout_gravity appropriately. Drawers commonly use match_parent for height with a fixed width.
+内容布局的宽高都设置为match_parent,侧滑的drawer通常设置高度match，宽度为指定的值（也就是说宽高都可以设置）
+DrawerLayout.DrawerListener can be used to monitor the state and motion of drawer views. Avoid performing expensive operations such as layout during animation as it can cause stuttering; try to perform expensive operations during the STATE_IDLE state. DrawerLayout.SimpleDrawerListener offers default/no-op implementations of each callback method.
+通过DrawerListener来监听侧滑view的状态，在动画时操作侧滑可能造成不流畅体验，所以应该在空闲时操作侧滑．DrawerListener包含的方法：
+onDrawerClosed(View drawerView)
+onDrawerOpened(View drawerView)
+onDrawerSlide(View drawerView, float slideOffset)
+onDrawerStateChanged(int newState)
+
+SimpleDrawerListener：Stub/no-op implementations of all methods of DrawerLayout.DrawerListener.
+上面这句话不知道怎么理解．DrawerListener时一个interface,而SimpleDrawerListener实现了该接口．具体使用的时候再分析吧．
+As per the Android Design guide, any drawers positioned to the left/start should always contain content for navigating around the application, whereas any drawers positioned to the right/end should always contain actions to take on the current content. This preserves the same navigation left, actions right structure present in the Action Bar and elsewhere.
+根据android的设计指导，左侧的任何drawer都应该包含导航的内容，右侧的任何drawer都应该包含对当前内容的操作．也就是说左侧滑和右侧滑对应的布局内容的设计是不一样的．
+
+根据文档，侧滑的方向由nav_view中设置android:layout_gravity来确定，这里以实际布局为例：
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">　
+
+    <include
+        layout="@layout/app_bar_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/activity_main_drawer" />
+
+</android.support.v4.widget.DrawerLayout>
+
+布局的相关属性说明：
+//重要：fitsSystemWindows属性，这里以android5.1虚拟机来研究．
+首先这个属性可以给所有的view设置:
+DrawerLayout的这个属性设为false或者不设置时，运行app发现系统状态栏(statusBar)是白色，导航侧滑布局也在statusBar下面，这时设置nav_view的fitsSystemWindows属性也没有任何效果（DrawerLayout是顶层，顶层属性失效，那么里面的view相关属性当然不起作用）．
+DrawerLayout的这个属性设置为true时，运行app发现系统状态栏根据当前app的toolbar(后面讲)的颜色自动变色了，变成了更深一级的颜色．这时nav_view的高度也和系统高度相同，观察nav_header就知道了．而且nav_header滑出来时，statusBar的颜色有两部分的变化，一个是内容部分对应的statusBar的颜色更深（因为nav_view出来后系统自动在内容部分遮罩了一层半透明），而nav_view部分对应的statusBar颜色是nav_header布局颜色的更深一层，也就是说statusBar根据app的顶层颜色自动变色．
+这时如果设置nav_view的fitsSystemWindows属性为false,那么nav_view的高度会在statusBar下方，并且statusBar的颜色只和内容布局的顶层（toolbar）相同．
+所以根据上面的分析，就知道如何实现沉浸式标题栏了．只要想办法让statusBar的颜色与app顶层布局颜色相同即可．从app当前的theme入手，在MainActivity对应的theme中加入属性：
+<item name="android:statusBarColor">@android:color/transparent</item>　但是这个属性又只能21以上版本才能使用，这里对当前app以及activity对应的theme进行分析，其中也是有不少坑的，要注意：
+application对应的theme:
+<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+MainActivity对应的theme(两个，一个是v21版本以下，另一个是v21以上):
+不同在于<item name="android:statusBarColor">@android:color/transparent</item>．
+v21以下：
+<style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+v21以上：
+<style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+android:statusBarColor：这个属性只有v21以上版本支持．
+
+//这里openDrawer的作用是：设置start时就可以在布局的Design视图上看到侧滑的导航nav_view,如果这里设置end或者不设置，那么Design视图中看不到nav_view.实际运行时不影响nav_view的侧滑．注意这个属性是属于tools:

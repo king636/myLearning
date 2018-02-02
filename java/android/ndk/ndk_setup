@@ -1,0 +1,199 @@
+项目NDKFFmpeg
+Android Studio中使用CMake配置ndk环境，并自动默认生成jni调用，很简单：
+（http://blog.csdn.net/zeqiao/article/details/77893167）
+AS->SDK Manger->SDK tools，安装以下：
+CMake
+LLDB
+NDK
+（可以在project structure->SDK Location下可以看到ndk安装路径：/home/nick/Android/Sdk/ndk-bundle）
+
+1. ndk项目说明
+安装后，新建project,选择include C++ support,新建工程完成后，在default的
+MainActivity中可以看到jni调用：
+// Used to load the 'native-lib' library on application startup.
+    static {
+        System.loadLibrary("native-lib");
+    }
+
+/**
+     * A native method that is implemented by the 'native-lib' native library,
+     * which is packaged with this application.
+     */
+    public native String stringFromJNI();
+
+查看local.properties可看到ndk引用：ndk.dir=/home/nick/Android/Sdk/ndk-bundle
+
+在app目录下，可看到自动生成的cpp文件native-lib.cpp:
+#include <jni.h>
+#include <string>
+
+extern "C"
+JNIEXPORT jstring
+
+JNICALL
+Java_com_nick_ndkffmpeg_MainActivity_stringFromJNI(
+        JNIEnv *env,
+        jobject /* this */) {
+    std::string hello = "Hello from C++";
+    return env->NewStringUTF(hello.c_str());
+}
+
+查看app的gradle文件：
+defaultConfig {
+        applicationId "com.nick.ndkffmpeg"
+        minSdkVersion 15
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+            }
+        }
+    }
+
+externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+
+查看CMakeLists.txt,该文件对jni使用进行了配置:
+add_library( # Sets the name of the library.
+             native-lib
+
+             # Sets the library as a shared library.
+             SHARED
+
+             # Provides a relative path to your source file(s).
+             src/main/cpp/native-lib.cpp )
+
+find_library( # Sets the name of the path variable.
+              log-lib
+
+              # Specifies the name of the NDK library that
+              # you want CMake to locate.
+              log )
+
+target_link_libraries( # Specifies the target library.
+                       native-lib
+
+                       # Links the target library to the log library
+                       # included in the NDK.
+                       ${log-lib} )
+
+由于默认是在MainActivity中使用，新建jni使用类,将方法改为static,这样外部可以直接调用．用try catch包裹jni的调用，防止库文件调用失败. 注意：cpp中的方法要重新生成，避免方法名与包名不一致：
+com.nick.ndkffmpeg.NativeJni:
+public class NativeJni {
+
+    // Used to load the 'native-lib' library on application startup.
+    static {
+        try{
+            System.loadLibrary("native-lib");
+        }catch(Exception e){
+            Log.e(TAG,"load jni NativeJni failed");
+        }
+    }
+    /**
+     * A native method that is implemented by the 'native-lib' native library,
+     * which is packaged with this application.
+     */
+    public static native String stringFromJNI();
+}
+
+2.参考默认jni调用，新建jni调用说明
+第一种直接在native-lib库中添加方法,在NativeJni中添加方法：
+public static native String sayHelloFromJNI();
+Alt+Enter自动修正，生成jni方法，查看native-lib.cpp:
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_nick_ndkffmpeg_NativeJni_sayHelloFromJNI(JNIEnv *env, jclass type) {
+
+    // TODO
+
+
+    return env->NewStringUTF("hello");
+}
+
+第二种是新建jni库，在cpp目录下新建:demo-lib.cpp
+提示：This file is not part of the project.Please include it in the appropriate build file....
+点击Sync Now，事实上并没有卵用．
+需要在CMakeLists.txt中进行添加，如下（注释可删除，保留native-lib的相关内容）：
+add_library( demo-lib
+             SHARED
+             src/main/cpp/demo-lib.cpp )
+
+target_link_libraries( demo-lib
+                       ${log-lib} )
+
+
+然后再点击sync noew,奇迹发生了，cpp目录下变成了：
+demo-lib
+    demo-lib.cpp
+native-lib
+    nvative-lib.cpp
+
+新建demo-lib的使用类:com.nick.ndkffmpeg，添加：
+static {
+        System.loadLibrary("demo-lib");
+    }
+
+public static native byte[] getBytes(byte[] bytes);
+自动修复创建后，该方法在navite-lib中创建（如何默认在demo-lib中创建？）
+从navite-lib中转移到demo-lib中：
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_com_nick_ndkffmpeg_DemoJni_getBytes(JNIEnv *env, jobject instance, jbyteArray bytes_) {
+    jbyte *bytes = env->GetByteArrayElements(bytes_, NULL);
+
+    // TODO
+    bytes[0] = 22;
+    env->ReleaseByteArrayElements(bytes_, bytes, 0);
+
+    return bytes_;
+}
+
+该方法实现对传入的字节数组修改首字节后返回．
+
+以上方法测试调用正常．
+
+3.生成so文件并导入新项目中使用．
+编译项目Ctrl+F9或者Build->Make Project,(项目切换为project模式)以下目录中生成so文件：
+/home/nick/work/NDKFFmpeg/app/build/intermediates/cmake/debug/obj
+libdemo-lib.so
+libnative-lib.so
+
+导入项目NdkSoTest中
+（项目切换为project模式）拷贝so文件到以下目录中(jniLibs目录要新建):
+/home/nick/work/NdkSoTest/app/src/main/jniLibs
+
+创建jni的使用类（非常注意，这里包名要和创建的一致，否则找不到）：
+com.nick.ndkffmpeg.NativeJni:
+public class NativeJni {
+    private static final String TAG = NativeJni.class.getSimpleName();
+
+    // Used to load the 'native-lib' library on application startup.
+    static {
+        try{
+            System.loadLibrary("native-lib");
+        }catch(Exception e){
+            Log.e(TAG,"load jni NativeJni failed");
+        }
+    }
+
+    /**
+     * A native method that is implemented by the 'native-lib' native library,
+     * which is packaged with this application.
+     */
+    public static native String stringFromJNI();
+
+    public static native String sayHelloFromJNI();
+}
+
+MainActivity中调用：
+tvContent.setText(NativeJni.sayHelloFromJNI());
+
+这样就可以了，所以一般来说，ndk编译出来的so文件都在sdk中使用，而对外提供接口调用．
+下一章节完成sdk中集成so文件，并发布接口．
+
